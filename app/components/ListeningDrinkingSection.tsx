@@ -100,8 +100,9 @@ function CoffeeIconSvg() {
 
 
 
-const SECTION_HEIGHT = 88;
-const HALF_HEIGHT = 44; // Min 44px for touch; Caramel row & "While Drinking" row
+const LISTENING_MIN_HEIGHT = 96; // Enough for title + 2-line track; min 44px touch
+const RIGHT_GAP = 12; // Gap between "While Drinking to:" and drink card
+const ROW_MIN_HEIGHT = 44; // Min 44px for touch targets
 
 export default function ListeningDrinkingSection() {
   const { t } = useLanguage();
@@ -119,12 +120,12 @@ export default function ListeningDrinkingSection() {
       className="grid w-full max-w-[562px] grid-cols-[281px_281px] gap-0 max-[562px]:grid-cols-1"
       style={{ marginTop: 70 }}
     >
-      {/* Left: Currently Listening - 271px from navbar left, full height (68px) = right section, bg #1DB954 */}
+      {/* Left: Currently Listening - full column width, min-height for title + track (2 lines) */}
       <div className="flex w-[281px] max-[562px]:w-full">
         <div
-          className="flex w-[271px] max-[562px]:w-full items-center justify-between gap-3 rounded-[10px] px-4"
+          className="flex w-[281px] max-[562px]:w-full items-center justify-between gap-3 rounded-[10px] px-4 py-3"
           style={{
-            height: SECTION_HEIGHT,
+            minHeight: LISTENING_MIN_HEIGHT,
             backgroundColor: "#1DB954",
           }}
         >
@@ -133,14 +134,14 @@ export default function ListeningDrinkingSection() {
               <img
                 src={nowPlaying.albumArtUrl}
                 alt=""
-                width={48}
-                height={48}
+                width={40}
+                height={40}
                 className="rounded shrink-0"
               />
             )}
             <div className="min-w-0 flex-1">
               <p
-                className="font-outfit font-normal text-[#323232]"
+                className="font-outfit font-normal text-[#323232] leading-tight"
                 style={{ fontSize: 24, letterSpacing: "-0.05em" }}
               >
                 {t("listening.title")}
@@ -150,20 +151,22 @@ export default function ListeningDrinkingSection() {
                   href={nowPlaying.trackUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-outfit font-normal block truncate hover:underline"
+                  className="font-outfit font-normal block hover:underline line-clamp-2 wrap-break-word"
                   style={{
                     fontSize: 16,
                     color: "var(--background)",
+                    lineHeight: 1.35,
                   }}
                 >
                   {trackLabel}
                 </a>
               ) : (
                 <p
-                  className="font-outfit font-normal truncate"
+                  className="font-outfit font-normal line-clamp-2 wrap-break-word"
                   style={{
                     fontSize: 16,
                     color: "var(--background)",
+                    lineHeight: 1.35,
                   }}
                 >
                   {trackLabel}
@@ -175,13 +178,17 @@ export default function ListeningDrinkingSection() {
         </div>
       </div>
 
-      {/* Right: 271px from navbar right - two rows of 34px each */}
-      <div className="flex w-[281px] max-[562px]:w-full flex-col items-end">
+      {/* Right: match left column height; gap between title and drink card */}
+      <div
+        className="flex w-[281px] max-[562px]:w-full flex-col items-end justify-between"
+        style={{ minHeight: LISTENING_MIN_HEIGHT }}
+      >
         <div
           className="flex w-[236px] max-[562px]:w-full min-h-[44px] items-end font-outfit font-medium text-[#323232]"
           style={{
-            minHeight: HALF_HEIGHT,
-            fontSize: 29,
+            minHeight: ROW_MIN_HEIGHT,
+            fontSize: 32,
+            letterSpacing: "-0.05em",
           }}
         >
           {t("listening.whileDrinking")}
@@ -189,7 +196,8 @@ export default function ListeningDrinkingSection() {
         <div
           className="flex w-[236px] max-[562px]:w-full min-h-[44px] items-center gap-3 rounded-[10px] px-4"
           style={{
-            minHeight: HALF_HEIGHT,
+            minHeight: ROW_MIN_HEIGHT,
+            marginTop: RIGHT_GAP,
             backgroundColor: "#FC6E20",
           }}
         >
@@ -197,7 +205,7 @@ export default function ListeningDrinkingSection() {
           <span
             className="font-outfit font-medium"
             style={{
-              fontSize: 16,
+              fontSize: 18,
               color: "var(--background)",
             }}
           >
