@@ -75,6 +75,7 @@ export type TranslationKeys = {
   // Project detail
   "project.github": string;
   "project.live": string;
+  "project.demo": string;
 };
 
 const translations: Record<Locale, TranslationKeys> = {
@@ -123,6 +124,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "back.label": "Back to home",
     "project.github": "GITHUB",
     "project.live": "LIVE",
+    "project.demo": "DEMO",
   },
   ja: {
     "nav.home": "ホーム",
@@ -169,6 +171,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "back.label": "ホームに戻る",
     "project.github": "GITHUB",
     "project.live": "LIVE",
+    "project.demo": "DEMO",
   },
   fr: {
     "nav.home": "Accueil",
@@ -215,6 +218,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "back.label": "Retour à l’accueil",
     "project.github": "GITHUB",
     "project.live": "LIVE",
+    "project.demo": "DEMO",
   },
   es: {
     "nav.home": "Inicio",
@@ -261,6 +265,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "back.label": "Volver al inicio",
     "project.github": "GITHUB",
     "project.live": "LIVE",
+    "project.demo": "DEMO",
   },
   hi: {
     "nav.home": "होम",
@@ -307,6 +312,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "back.label": "वापस होम",
     "project.github": "GITHUB",
     "project.live": "LIVE",
+    "project.demo": "DEMO",
   },
   ru: {
     "nav.home": "Главная",
@@ -353,6 +359,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "back.label": "Назад на главную",
     "project.github": "GITHUB",
     "project.live": "LIVE",
+    "project.demo": "DEMO",
   },
   ur: {
     "nav.home": "ہوم",
@@ -399,6 +406,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "back.label": "واپس ہوم",
     "project.github": "GITHUB",
     "project.live": "LIVE",
+    "project.demo": "DEMO",
   },
 };
 

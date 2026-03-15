@@ -10,6 +10,8 @@ export type Project = {
   details: string[];
   githubUrl: string;
   liveUrl: string;
+  /** Optional demo/walkthrough link (e.g. LinkedIn post) */
+  demoUrl?: string;
 };
 
 export const PROJECTS: Project[] = [
@@ -27,8 +29,10 @@ export const PROJECTS: Project[] = [
       "Built resilient retry orchestration with adaptive flags: on failure, the system re-runs the pipeline with modified parameters to optimize output quality, achieving a 95% workflow success rate.",
       "Implemented full OAuth 2.0 token lifecycle, webhook ingestion, rate limiting, and background job queuing end-to-end.",
     ],
-    githubUrl: "#",
-    liveUrl: "#",
+    githubUrl: "https://github.com/shobhitsrivastava2023/Non-Linear-WorkFlows-",
+    liveUrl: "https://non-linear-work-flows.vercel.app/",
+    demoUrl:
+      "https://www.linkedin.com/posts/shobhit-srivastava-s1323_this-summer-break-i-built-around-26-different-activity-7361292978176352257-qPXz?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD4x6noBeLC9v2gWCC6nZUTSZaWs1kaxe8M",
   },
   {
     slug: "lexel",
@@ -42,7 +46,7 @@ export const PROJECTS: Project[] = [
       "LEXEL is an AI text-to-speech and voice-cloning platform where users can turn scripts into voiceovers with system or custom cloned voices, do live translation in 23 languages, and rate outputs with MOS scores (naturalness, clarity, intelligibility).",
       "The app includes a dark themed dashboard; audio is stored in R2 and TTS is powered by a self hosted AI pipeline.",
     ],
-    githubUrl: "#",
+    githubUrl: "https://github.com/shobhitsrivastava2023/lexel",
     liveUrl: "#",
   },
 ];

@@ -82,6 +82,7 @@ export default function ProjectPage({
           <ProjectActionLinks
             githubUrl={project.githubUrl}
             liveUrl={project.liveUrl}
+            demoUrl={project.demoUrl}
           />
         </article>
       </main>

@@ -17,6 +17,9 @@ const urbanist = Urbanist({
 export const metadata: Metadata = {
   title: "Shobhit | Portfolio",
   description: "Portfolio of Shobhit",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export const viewport: Viewport = {
