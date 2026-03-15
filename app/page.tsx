@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import CardsSection from "./components/CardsSection";
@@ -14,12 +15,16 @@ export default function Home() {
       <main className="flex w-full max-w-[562px] flex-col items-center px-4 min-[563px]:px-0">
         <Navbar />
         <Hero />
-        <CardsSection />
+        <Suspense fallback={null}>
+          <CardsSection />
+        </Suspense>
         <BeyondCode />
         <ListeningDrinkingSection />
         <Philosophy />
         <MusicProduction />
-        <Blogs />
+        <Suspense fallback={null}>
+          <Blogs />
+        </Suspense>
         <Footer />
       </main>
     </div>
