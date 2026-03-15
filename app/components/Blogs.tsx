@@ -1,13 +1,26 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { BLOGS } from "../data/blogs";
 import { useLanguage } from "../context/LanguageContext";
 
 export default function Blogs() {
+  const searchParams = useSearchParams();
   const { t } = useLanguage();
+
+  useEffect(() => {
+    if (searchParams.get("section") === "blogs") {
+      requestAnimationFrame(() => {
+        document.getElementById("section-blogs")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  }, [searchParams]);
+
   return (
     <section
+      id="section-blogs"
       className="w-full max-w-[562px]"
       style={{ marginTop: 69 }}
     >
@@ -29,7 +42,7 @@ export default function Blogs() {
         {BLOGS.map((post) => (
           <li key={post.slug}>
             <Link
-              href={`/blog/${post.slug}`}
+              href={`/blog/${post.slug}?from=blogs`}
               className="flex min-h-[44px] items-end justify-between gap-4 border-b border-[#323232] py-4 no-underline text-[#323232] transition-opacity hover:opacity-80 first:pt-0 touch-manipulation focus:outline-none focus-visible:opacity-80"
               style={{ borderBottomWidth: 1 }}
             >

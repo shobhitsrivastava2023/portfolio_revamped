@@ -1,4 +1,3 @@
-import { use } from "react";
 import { notFound } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import BackButton from "../../components/BackButton";
@@ -8,12 +7,18 @@ export function generateStaticParams() {
   return BLOGS.map((b) => ({ slug: b.slug }));
 }
 
-export default function BlogPostPage({
+export default async function BlogPostPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ from?: string }>;
 }) {
-  const { slug } = use(params);
+  const { slug } = await params;
+  const search = await searchParams;
+  const from = search?.from;
+  const backHref = from === "blogs" ? "/?section=blogs" : from === "blog" ? "/blog" : "/";
+
   const post = getBlogBySlug(slug);
   if (!post) notFound();
 
@@ -31,7 +36,7 @@ export default function BlogPostPage({
           className="flex w-full max-w-[562px] flex-col"
           style={{ marginTop: 50 }}
         >
-          <BackButton href="/" />
+          <BackButton href={backHref} />
 
           <h1
             className="mt-6 w-full font-outfit font-medium text-[#1B1B1B] max-[562px]:text-[clamp(1.75rem,8vw,48px)]"

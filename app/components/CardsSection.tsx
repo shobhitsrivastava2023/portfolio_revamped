@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { PROJECTS } from "../data/projects";
 import { EXPERIENCES } from "../data/experience";
@@ -78,12 +79,34 @@ function DownloadIcon({ className }: { className?: string }) {
 }
 
 export default function CardsSection() {
+  const searchParams = useSearchParams();
   const [experienceOpen, setExperienceOpen] = useState(false);
   const [projectsOpen, setProjectsOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const langDropdownRef = useRef<HTMLDivElement>(null);
   const { locale, setLocale, t, localeLabel, locales } = useLanguage();
+
+  // Restore accordion state and scroll when returning from detail page (e.g. Back with ?section=experience)
+  useEffect(() => {
+    const section = searchParams.get("section");
+    if (section === "experience") {
+      setExperienceOpen(true);
+      requestAnimationFrame(() => {
+        document.getElementById("section-experience")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    } else if (section === "projects") {
+      setProjectsOpen(true);
+      requestAnimationFrame(() => {
+        document.getElementById("section-projects")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    } else if (section === "contact") {
+      setContactOpen(true);
+      requestAnimationFrame(() => {
+        document.getElementById("section-contact")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -138,6 +161,7 @@ export default function CardsSection() {
           </a>
         </motion.div>
         <div
+          id="section-experience"
           className="w-[271px] max-[562px]:w-full overflow-hidden rounded-[10px] bg-[#323232] p-4"
           style={{
             minHeight: 168,
@@ -226,7 +250,7 @@ export default function CardsSection() {
                         }}
                       >
                         <Link
-                          href={`/experiences/${entry.slug}`}
+                          href={`/experiences/${entry.slug}?from=experience`}
                           className="flex items-center min-h-[1.5em] no-underline text-[#FFE7D0] hover:opacity-80"
                           style={{ marginBottom: 14 }}
                         >
@@ -263,6 +287,7 @@ export default function CardsSection() {
           </AnimatePresence>
         </div>
         <div
+          id="section-projects"
           className="w-[271px] max-[562px]:w-full overflow-hidden rounded-[10px] bg-[#FC6E20] p-4"
           style={{
             minHeight: 168,
@@ -325,7 +350,7 @@ export default function CardsSection() {
                       style={i > 0 ? { marginTop: 28 } : undefined}
                     >
                       <Link
-                        href={`/projects/${project.slug}`}
+                        href={`/projects/${project.slug}?from=projects`}
                         className="flex items-start justify-between gap-2 no-underline text-[#323232] hover:opacity-80"
                         aria-label={`Open ${project.name}`}
                       >
@@ -431,6 +456,7 @@ export default function CardsSection() {
           </div>
         </div>
         <div
+          id="section-contact"
           className="w-[224px] max-[562px]:w-full overflow-hidden rounded-[10px] bg-[#323232] p-4"
           style={{
             minHeight: 168,

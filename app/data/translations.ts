@@ -55,6 +55,7 @@ export type TranslationKeys = {
   // Listening / Drinking
   "listening.title": string;
   "listening.track": string;
+  "listening.notListening": string;
   "listening.whileDrinking": string;
   "listening.drink": string;
   // Philosophy
@@ -108,6 +109,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "beyondCode.title": "BEYOND CODE",
     "listening.title": "Currently Listening:",
     "listening.track": "of monsters and men : empire",
+    "listening.notListening": "Not listening right now",
     "listening.whileDrinking": "While Drinking to:",
     "listening.drink": "Caramel Macchiato",
     "philosophy.title": "philosophy",
@@ -155,6 +157,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "beyondCode.title": "BEYOND CODE",
     "listening.title": "現在聴いている曲:",
     "listening.track": "of monsters and men : empire",
+    "listening.notListening": "今は再生していません",
     "listening.whileDrinking": "飲みながら:",
     "listening.drink": "キャラメルマキアート",
     "philosophy.title": "哲学",
@@ -202,6 +205,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "beyondCode.title": "BEYOND CODE",
     "listening.title": "En ce moment :",
     "listening.track": "of monsters and men : empire",
+    "listening.notListening": "Rien en ce moment",
     "listening.whileDrinking": "En buvant :",
     "listening.drink": "Caramel Macchiato",
     "philosophy.title": "Philosophie",
@@ -249,6 +253,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "beyondCode.title": "BEYOND CODE",
     "listening.title": "Escuchando ahora:",
     "listening.track": "of monsters and men : empire",
+    "listening.notListening": "No estoy escuchando ahora",
     "listening.whileDrinking": "Mientras tomo:",
     "listening.drink": "Caramel Macchiato",
     "philosophy.title": "Filosofía",
@@ -296,6 +301,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "beyondCode.title": "BEYOND CODE",
     "listening.title": "अभी सुन रहा हूँ:",
     "listening.track": "of monsters and men : empire",
+    "listening.notListening": "अभी कुछ नहीं सुन रहा",
     "listening.whileDrinking": "पीते हुए:",
     "listening.drink": "कैरामेल मकियातो",
     "philosophy.title": "दर्शन",
@@ -343,6 +349,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "beyondCode.title": "BEYOND CODE",
     "listening.title": "Сейчас слушаю:",
     "listening.track": "of monsters and men : empire",
+    "listening.notListening": "Сейчас ничего не слушаю",
     "listening.whileDrinking": "Под:",
     "listening.drink": "Карамельный макиато",
     "philosophy.title": "Философия",
@@ -390,6 +397,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "beyondCode.title": "BEYOND CODE",
     "listening.title": "اب سن رہا ہوں:",
     "listening.track": "of monsters and men : empire",
+    "listening.notListening": "اب کچھ نہیں سن رہا",
     "listening.whileDrinking": "پیتے ہوئے:",
     "listening.drink": "کیریمل مکچیاتو",
     "philosophy.title": "فلسفہ",

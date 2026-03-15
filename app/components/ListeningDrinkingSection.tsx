@@ -1,6 +1,47 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useLanguage } from "../context/LanguageContext";
+
+type NowPlaying =
+  | { isPlaying: true; track: string; artists: string; albumArtUrl: string | null; trackUrl: string | null }
+  | { isPlaying: false }
+  | null;
+
+function useNowPlaying() {
+  const [data, setData] = useState<NowPlaying>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const poll = async () => {
+      try {
+        const res = await fetch("/api/spotify/now-playing", { cache: "no-store" });
+        if (cancelled) return;
+        if (!res.ok) {
+          setData({ isPlaying: false });
+          return;
+        }
+        const json = await res.json();
+        if (json.error) {
+          setData({ isPlaying: false });
+          return;
+        }
+        setData(json);
+      } catch {
+        if (!cancelled) setData({ isPlaying: false });
+      }
+    };
+
+    poll();
+    const interval = setInterval(poll, 20_000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
+
+  return data;
+}
 function PlayButtonSvg() {
   return (
     <svg
@@ -64,6 +105,15 @@ const HALF_HEIGHT = 44; // Min 44px for touch; Caramel row & "While Drinking" ro
 
 export default function ListeningDrinkingSection() {
   const { t } = useLanguage();
+  const nowPlaying = useNowPlaying();
+
+  const trackLabel =
+    nowPlaying === null
+      ? t("listening.track")
+      : nowPlaying.isPlaying
+        ? `${nowPlaying.artists} : ${nowPlaying.track}`
+        : t("listening.notListening");
+
   return (
     <section
       className="grid w-full max-w-[562px] grid-cols-[281px_281px] gap-0 max-[562px]:grid-cols-1"
@@ -78,22 +128,48 @@ export default function ListeningDrinkingSection() {
             backgroundColor: "#1DB954",
           }}
         >
-          <div className="min-w-0 flex-1">
-            <p
-              className="font-outfit font-normal text-[#323232]"
-              style={{ fontSize: 24, letterSpacing: "-0.05em" }}
-            >
-              {t("listening.title")}
-            </p>
-            <p
-              className="font-outfit font-normal"
-              style={{
-                fontSize: 16,
-                color: "var(--background)",
-              }}
-            >
-              {t("listening.track")}
-            </p>
+          <div className="min-w-0 flex-1 flex items-center gap-3">
+            {nowPlaying?.isPlaying && nowPlaying.albumArtUrl && (
+              <img
+                src={nowPlaying.albumArtUrl}
+                alt=""
+                width={48}
+                height={48}
+                className="rounded shrink-0"
+              />
+            )}
+            <div className="min-w-0 flex-1">
+              <p
+                className="font-outfit font-normal text-[#323232]"
+                style={{ fontSize: 24, letterSpacing: "-0.05em" }}
+              >
+                {t("listening.title")}
+              </p>
+              {nowPlaying?.isPlaying && nowPlaying.trackUrl ? (
+                <a
+                  href={nowPlaying.trackUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-outfit font-normal block truncate hover:underline"
+                  style={{
+                    fontSize: 16,
+                    color: "var(--background)",
+                  }}
+                >
+                  {trackLabel}
+                </a>
+              ) : (
+                <p
+                  className="font-outfit font-normal truncate"
+                  style={{
+                    fontSize: 16,
+                    color: "var(--background)",
+                  }}
+                >
+                  {trackLabel}
+                </p>
+              )}
+            </div>
           </div>
           <PlayButtonSvg />
         </div>

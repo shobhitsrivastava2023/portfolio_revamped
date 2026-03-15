@@ -1,4 +1,3 @@
-import { use } from "react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import Navbar from "../../components/Navbar";
@@ -10,12 +9,18 @@ export function generateStaticParams() {
   return PROJECTS.map((p) => ({ slug: p.slug }));
 }
 
-export default function ProjectPage({
+export default async function ProjectPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ from?: string }>;
 }) {
-  const { slug } = use(params);
+  const { slug } = await params;
+  const search = await searchParams;
+  const from = search?.from;
+  const backHref = from ? `/?section=${from}` : "/";
+
   const project = getProjectBySlug(slug);
   if (!project) notFound();
 
@@ -31,7 +36,7 @@ export default function ProjectPage({
           className="flex w-full max-w-[562px] flex-col items-center"
           style={{ marginTop: 50 }}
         >
-          <BackButton />
+          <BackButton href={backHref} />
           <h1
             className="mt-6 w-full font-outfit font-medium text-[#1B1B1B] max-[562px]:text-[clamp(2rem,14vw,80px)]"
             style={{

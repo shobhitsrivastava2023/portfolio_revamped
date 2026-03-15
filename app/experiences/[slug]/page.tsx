@@ -1,22 +1,24 @@
-import { use } from "react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import BackButton from "../../components/BackButton";
 import { getExperienceBySlug, EXPERIENCES } from "../../data/experience";
 
-const CONTENT_WIDTH = 562;
-
 export function generateStaticParams() {
   return EXPERIENCES.map((e) => ({ slug: e.slug }));
 }
 
-export default function ExperiencePage({
+export default async function ExperiencePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ from?: string }>;
 }) {
-  const { slug } = use(params);
+  const { slug } = await params;
+  const search = await searchParams;
+  const from = search?.from;
+  const backHref = from ? `/?section=${from}` : "/";
+
   const experience = getExperienceBySlug(slug);
   if (!experience) notFound();
 
@@ -28,7 +30,7 @@ export default function ExperiencePage({
           className="flex w-full max-w-[562px] flex-col"
           style={{ marginTop: 50 }}
         >
-          <BackButton />
+          <BackButton href={backHref} />
 
           <div
             className="mt-6 flex w-full flex-col gap-2 max-[562px]:flex-col min-[563px]:flex-row min-[563px]:items-start min-[563px]:justify-between min-[563px]:gap-6"
