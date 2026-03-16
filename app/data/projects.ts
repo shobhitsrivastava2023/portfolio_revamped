@@ -49,6 +49,39 @@ export const PROJECTS: Project[] = [
     githubUrl: "https://github.com/shobhitsrivastava2023/lexel",
     liveUrl: "#",
   },
+  {
+    slug: "enigma",
+    name: "Enigma",
+    tagline: "Most Accurate Enigma Simulator",
+    image: "/project3.png",
+    imageAlt: "Enigma simulator app",
+    description:
+      "Interactive Enigma machine simulator that recreates M3/M4 rotor logic in JavaScript, with live visualization of rotor stepping, plugboard swaps, and reflector wiring so you can trace every character through the cipher.",
+    details: [
+      "Built a custom JavaScript Enigma engine that faithfully simulates M3/M4 mechanical cipher logic, including dynamic rotor stepping, plugboard substitution, and reflector wiring, making the full encryption process inspectable in real time.",
+      "Exposed internal cipher state through a visualization layer, allowing users to trace character substitutions through each rotor stage interactively.",
+    ],
+    githubUrl: "https://github.com/shobhitsrivastava2023/Enigma",
+    liveUrl: "https://enigma-nine-ashy.vercel.app/",
+  },
+  {
+    slug: "talkio",
+    name: "Talkio",
+    tagline: "Smart chat with timed and selective group messaging",
+    image: "/project4.png",
+    imageAlt: "Talkio chat app",
+    description:
+      "Real-time chat app with scheduled messages, selective group conversations, and rich user profiles, built on WebSocket-based messaging, per-user scheduling queues, and searchable conversation metadata.",
+    details: [
+      "Implemented timed messaging so users can schedule messages for a specific date and time; messages are persisted with execution metadata and dispatched by a server-side scheduler that fans out to the appropriate WebSocket rooms when due.",
+      "Designed selective group messaging for formal teams: within a group, users can create task-specific subthreads that only involve selected members, while still inheriting the group context so assignments stay discoverable without polluting everyone’s main chat list.",
+      "Built real-time chat delivery with WebSockets (or Socket.io), room-based subscriptions, and presence indicators so messages, read states, and member joins/leaves propagate instantly across devices.",
+      "Added full auth and profile management: email/password sign-up and login, JWT session handling, editable bios and avatars, and privacy-aware profile fields surfaced in conversations.",
+      "Implemented conversation and user search with indexed queries over message text, participants, and tags so users can jump directly to people, tasks, or groups from a single search box.",
+    ],
+    githubUrl: "#",
+    liveUrl: "#",
+  },
 ];
 
 export function getProjectBySlug(slug: string): Project | undefined {

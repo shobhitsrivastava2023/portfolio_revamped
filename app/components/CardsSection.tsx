@@ -367,21 +367,27 @@ export default function CardsSection() {
                           <ExternalLinkIcon className="text-[#323232]" />
                         </span>
                       </Link>
-                      <div className="relative mt-3 w-full overflow-hidden rounded-md max-[562px]:aspect-221/140 min-[563px]:h-[140px] min-[563px]:w-[221px]">
-                        <Image
-                          src={project.image}
-                          alt={project.imageAlt}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 562px) 100vw, 221px"
-                        />
+                      <Link
+                        href={`/projects/${project.slug}?from=projects`}
+                        className="mt-3 block no-underline text-[#323232] hover:opacity-80"
+                        aria-label={`Open ${project.name} project details from image`}
+                      >
+                        <div className="relative w-full overflow-hidden rounded-md max-[562px]:aspect-221/140 min-[563px]:h-[140px] min-[563px]:w-[221px]">
+                          <Image
+                            src={project.image}
+                            alt={project.imageAlt}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 562px) 100vw, 221px"
+                          />
+                        </div>
                         <p
                           className="mt-2 leading-snug"
                           style={{ fontSize: 12, letterSpacing: "normal" }}
                         >
                           {project.description}
                         </p>
-                      </div>
+                      </Link>
                     </div>
                   ))}
                 </motion.div>

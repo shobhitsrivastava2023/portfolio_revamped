@@ -103,17 +103,24 @@ function CoffeeIconSvg() {
 const LISTENING_MIN_HEIGHT = 96; // Enough for title + 2-line track; min 44px touch
 const RIGHT_GAP = 12; // Gap between "While Drinking to:" and drink card
 const ROW_MIN_HEIGHT = 44; // Min 44px for touch targets
+const MAX_TRACK_LABEL_LENGTH = 80;
 
 export default function ListeningDrinkingSection() {
   const { t } = useLanguage();
   const nowPlaying = useNowPlaying();
 
-  const trackLabel =
-    nowPlaying === null
-      ? t("listening.track")
-      : nowPlaying.isPlaying
-        ? `${nowPlaying.artists} : ${nowPlaying.track}`
-        : t("listening.notListening");
+  let trackLabel: string;
+  if (nowPlaying === null) {
+    trackLabel = t("listening.track");
+  } else if (nowPlaying.isPlaying) {
+    const full = `${nowPlaying.artists} : ${nowPlaying.track}`;
+    trackLabel =
+      full.length > MAX_TRACK_LABEL_LENGTH
+        ? `${full.slice(0, MAX_TRACK_LABEL_LENGTH - 1)}…`
+        : full;
+  } else {
+    trackLabel = t("listening.notListening");
+  }
 
   return (
     <section
