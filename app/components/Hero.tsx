@@ -52,13 +52,23 @@ export default function Hero() {
       </div>
 
       {/* Right column: 281px, photo attached to right margin of navbar; full width on mobile, reduced height + gap from text */}
-      <div className="relative flex w-[281px] max-[562px]:w-full max-[562px]:justify-start min-[563px]:justify-end max-[562px]:aspect-[224/200] max-[562px]:max-h-[220px]">
+      <div className="relative flex w-[281px] max-[562px]:w-full max-[562px]:justify-start min-[563px]:justify-end max-[562px]:aspect-224/200 max-[562px]:max-h-[220px]">
+        {/* Desktop / larger viewports: original hero photo */}
         <Image
           src="/hero.jpg"
           alt="Portrait"
           width={224}
           height={272}
-          className="rounded-[9px] object-cover w-[224px] h-[272px] max-[562px]:!w-full max-[562px]:!h-full max-[562px]:!min-h-0"
+          className="hidden min-[563px]:block rounded-[9px] object-cover w-[224px] h-[272px]"
+          priority
+        />
+        {/* Mobile view: alternate hero image */}
+        <Image
+          src="/hero2.png"
+          alt="Portrait"
+          width={224}
+          height={272}
+          className="block min-[563px]:hidden rounded-[9px] object-cover w-full h-full max-[562px]:min-h-0!"
           priority
         />
       </div>
