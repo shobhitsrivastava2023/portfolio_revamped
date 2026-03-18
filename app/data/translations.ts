@@ -121,7 +121,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "pow.title": "Proof of Work",
     "pow.lastDays": "Last {days} days · {count} events · older lives in Calendar",
     "pow.openCalendar": "open calendar",
-    "pow.calendarUrl": "https://calendar.google.com/calendar/u/0/r",
+    "pow.calendarUrl": "/api/pow/calendar",
     "pow.empty":
       "No events yet. Once GitHub webhooks are connected, you’ll see commits/PRs/CI here in near real time.",
     "philosophy.title": "philosophy",
@@ -175,7 +175,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "pow.title": "作業ログ",
     "pow.lastDays": "直近 {days} 日 · {count} 件 · 過去分はカレンダーへ",
     "pow.openCalendar": "カレンダーを開く",
-    "pow.calendarUrl": "https://calendar.google.com/calendar/u/0/r",
+    "pow.calendarUrl": "/api/pow/calendar",
     "pow.empty":
       "まだイベントがありません。GitHub Webhook を接続すると、コミット/PR/CI がここに表示されます。",
     "philosophy.title": "哲学",
@@ -229,7 +229,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "pow.title": "Preuve de travail",
     "pow.lastDays": "{count} événements · {days} derniers jours · le reste est dans le calendrier",
     "pow.openCalendar": "ouvrir le calendrier",
-    "pow.calendarUrl": "https://calendar.google.com/calendar/u/0/r",
+    "pow.calendarUrl": "/api/pow/calendar",
     "pow.empty":
       "Aucun événement pour l’instant. Connecte les webhooks GitHub pour voir commits/PR/CI ici.",
     "philosophy.title": "Philosophie",
@@ -283,7 +283,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "pow.title": "Prueba de trabajo",
     "pow.lastDays": "Últimos {days} días · {count} eventos · lo anterior está en el calendario",
     "pow.openCalendar": "abrir calendario",
-    "pow.calendarUrl": "https://calendar.google.com/calendar/u/0/r",
+    "pow.calendarUrl": "/api/pow/calendar",
     "pow.empty":
       "Aún no hay eventos. Conecta los webhooks de GitHub para ver commits/PR/CI aquí.",
     "philosophy.title": "Filosofía",
@@ -337,7 +337,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "pow.title": "काम का प्रमाण",
     "pow.lastDays": "पिछले {days} दिन · {count} इवेंट्स · पुराने कैलेंडर में",
     "pow.openCalendar": "कैलेंडर खोलें",
-    "pow.calendarUrl": "https://calendar.google.com/calendar/u/0/r",
+    "pow.calendarUrl": "/api/pow/calendar",
     "pow.empty":
       "अभी कोई इवेंट नहीं। GitHub webhooks जोड़ने पर commits/PR/CI यहाँ दिखेंगे।",
     "philosophy.title": "दर्शन",
@@ -391,7 +391,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "pow.title": "Доказательство работы",
     "pow.lastDays": "Последние {days} дней · {count} событий · старое в календаре",
     "pow.openCalendar": "открыть календарь",
-    "pow.calendarUrl": "https://calendar.google.com/calendar/u/0/r",
+    "pow.calendarUrl": "/api/pow/calendar",
     "pow.empty":
       "Пока нет событий. Подключи GitHub webhooks — и здесь появятся коммиты/PR/CI.",
     "philosophy.title": "Философия",
@@ -445,7 +445,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "pow.title": "کام کا ثبوت",
     "pow.lastDays": "پچھلے {days} دن · {count} ایونٹس · پرانا کیلنڈر میں",
     "pow.openCalendar": "کیلنڈر کھولیں",
-    "pow.calendarUrl": "https://calendar.google.com/calendar/u/0/r",
+    "pow.calendarUrl": "/api/pow/calendar",
     "pow.empty":
       "ابھی کوئی ایونٹ نہیں۔ GitHub webhooks جوڑیں تو commits/PR/CI یہاں نظر آئیں گے۔",
     "philosophy.title": "فلسفہ",
