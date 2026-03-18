@@ -110,7 +110,7 @@ export const BLOGS: BlogPost[] = [
  
       <p>The season itself is months of opening the same portal every morning, watching the same companies visit, attending pre-placement talks designed to make you feel lucky for the opportunity to apply, and then hearing nothing. It is demoralizing by design — or at least demoralizing by indifference, which amounts to the same thing.</p>
  
-      <h2>What I wish I had done differently</h2>
+      <h2>What I wish I had done, differently</h2>
  
       <p>I wish I had understood earlier that the job market outside campus is a completely different game. On the open market, a well-built project, a clean GitHub, a thoughtful portfolio, and the ability to talk technically about your own work matters enormously. The CGPA filter still exists at some companies — but it competes with actual evidence of competence rather than replacing it.</p>
  
