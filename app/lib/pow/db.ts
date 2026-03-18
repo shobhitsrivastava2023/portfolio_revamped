@@ -58,13 +58,13 @@ export async function upsertPowEvents(events: PowEvent[]): Promise<number> {
 
 export async function listPowEventsLastDays(days: number): Promise<StoredPowEventRow[]> {
   const q = sql();
-  const rows = await q<StoredPowEventRow[]>`
+  const rows = (await q`
     select id, occurred_at::text, created_at::text, source, repo, event_type, url, dedupe_key, meta
     from pow_events
     where occurred_at >= (now() - (${days} || ' days')::interval)
     order by occurred_at desc
     limit 300;
-  `;
+  `) as StoredPowEventRow[];
   return rows;
 }
 
