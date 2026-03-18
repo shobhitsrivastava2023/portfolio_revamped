@@ -4,6 +4,7 @@ import Hero from "./components/Hero";
 import CardsSection from "./components/CardsSection";
 import BeyondCode from "./components/BeyondCode";
 import ListeningDrinkingSection from "./components/ListeningDrinkingSection";
+import ProofOfWorkSection from "./components/ProofOfWorkSection";
 import Philosophy from "./components/Philosophy";
 import MusicProduction from "./components/MusicProduction";
 import Blogs from "./components/Blogs";
@@ -20,6 +21,7 @@ export default function Home() {
         </Suspense>
         <BeyondCode />
         <ListeningDrinkingSection />
+        <ProofOfWorkSection />
         <Philosophy />
         <MusicProduction />
         <Suspense fallback={null}>

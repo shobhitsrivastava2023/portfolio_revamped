@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 const SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize";
 const SCOPES = ["user-read-currently-playing", "user-read-playback-state"].join(
   " "
 );
 
-export function GET(request: NextRequest) {
+export function GET() {
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   if (!clientId) {
     return NextResponse.json(

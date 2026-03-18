@@ -58,6 +58,12 @@ export type TranslationKeys = {
   "listening.notListening": string;
   "listening.whileDrinking": string;
   "listening.drink": string;
+  // Proof of Work
+  "pow.title": string;
+  "pow.lastDays": string;
+  "pow.openCalendar": string;
+  "pow.calendarUrl": string;
+  "pow.empty": string;
   // Philosophy
   "philosophy.title": string;
   "philosophy.body": string;
@@ -112,6 +118,12 @@ const translations: Record<Locale, TranslationKeys> = {
     "listening.notListening": "Not listening right now",
     "listening.whileDrinking": "While Drinking to:",
     "listening.drink": "Caramel Macchiato",
+    "pow.title": "Proof of Work",
+    "pow.lastDays": "Last {days} days · {count} events · older lives in Calendar",
+    "pow.openCalendar": "open calendar",
+    "pow.calendarUrl": "https://calendar.google.com/calendar/u/0/r",
+    "pow.empty":
+      "No events yet. Once GitHub webhooks are connected, you’ll see commits/PRs/CI here in near real time.",
     "philosophy.title": "philosophy",
     "philosophy.body":
       "this part is raw here, a space where i put my thoughts in. my journey has been tough, even though i still need to learn a lot but something that i am a firm believer of, genuine struggle always surpasses luck. I've seen so many of my people getting places for which they didnt prepare or worked hard for, purely based on luck. and i want to prove them wrong.",
@@ -160,6 +172,12 @@ const translations: Record<Locale, TranslationKeys> = {
     "listening.notListening": "今は再生していません",
     "listening.whileDrinking": "飲みながら:",
     "listening.drink": "キャラメルマキアート",
+    "pow.title": "作業ログ",
+    "pow.lastDays": "直近 {days} 日 · {count} 件 · 過去分はカレンダーへ",
+    "pow.openCalendar": "カレンダーを開く",
+    "pow.calendarUrl": "https://calendar.google.com/calendar/u/0/r",
+    "pow.empty":
+      "まだイベントがありません。GitHub Webhook を接続すると、コミット/PR/CI がここに表示されます。",
     "philosophy.title": "哲学",
     "philosophy.body":
       "ここでは飾らず、自分の考えを書きます。道のりは厳しかったし、まだ学ぶことは多い。それでも信じているのは、本気の努力は運を超えるということ。準備も努力もせず、運だけで場所を得た人をたくさん見てきた。彼らに間違いを証明したい。",
@@ -208,6 +226,12 @@ const translations: Record<Locale, TranslationKeys> = {
     "listening.notListening": "Rien en ce moment",
     "listening.whileDrinking": "En buvant :",
     "listening.drink": "Caramel Macchiato",
+    "pow.title": "Preuve de travail",
+    "pow.lastDays": "{count} événements · {days} derniers jours · le reste est dans le calendrier",
+    "pow.openCalendar": "ouvrir le calendrier",
+    "pow.calendarUrl": "https://calendar.google.com/calendar/u/0/r",
+    "pow.empty":
+      "Aucun événement pour l’instant. Connecte les webhooks GitHub pour voir commits/PR/CI ici.",
     "philosophy.title": "Philosophie",
     "philosophy.body":
       "Cette partie est brute, un espace où je pose mes pensées. Mon parcours a été dur ; j’ai encore beaucoup à apprendre, mais je crois fermement que le vrai effort dépasse la chance. J’ai vu tant de proches atteindre des endroits pour lesquels ils ne s’étaient pas préparés, par pur hasard. Je veux leur prouver le contraire.",
@@ -256,6 +280,12 @@ const translations: Record<Locale, TranslationKeys> = {
     "listening.notListening": "No estoy escuchando ahora",
     "listening.whileDrinking": "Mientras tomo:",
     "listening.drink": "Caramel Macchiato",
+    "pow.title": "Prueba de trabajo",
+    "pow.lastDays": "Últimos {days} días · {count} eventos · lo anterior está en el calendario",
+    "pow.openCalendar": "abrir calendario",
+    "pow.calendarUrl": "https://calendar.google.com/calendar/u/0/r",
+    "pow.empty":
+      "Aún no hay eventos. Conecta los webhooks de GitHub para ver commits/PR/CI aquí.",
     "philosophy.title": "Filosofía",
     "philosophy.body":
       "Esta parte es cruda; un espacio donde dejo mis pensamientos. Mi camino ha sido duro y aún me queda mucho por aprender, pero creo firmemente en que el esfuerzo genuino supera a la suerte. He visto a mucha gente llegar a sitios para los que no se prepararon, solo por suerte. Quiero demostrarles que se equivocan.",
@@ -304,6 +334,12 @@ const translations: Record<Locale, TranslationKeys> = {
     "listening.notListening": "अभी कुछ नहीं सुन रहा",
     "listening.whileDrinking": "पीते हुए:",
     "listening.drink": "कैरामेल मकियातो",
+    "pow.title": "काम का प्रमाण",
+    "pow.lastDays": "पिछले {days} दिन · {count} इवेंट्स · पुराने कैलेंडर में",
+    "pow.openCalendar": "कैलेंडर खोलें",
+    "pow.calendarUrl": "https://calendar.google.com/calendar/u/0/r",
+    "pow.empty":
+      "अभी कोई इवेंट नहीं। GitHub webhooks जोड़ने पर commits/PR/CI यहाँ दिखेंगे।",
     "philosophy.title": "दर्शन",
     "philosophy.body":
       "यह हिस्सा कच्चा है—यहाँ मैं अपने विचार रखता हूँ। मेरा सफर कठिन रहा; अभी बहुत सीखना बाकी है, लेकिन मैं मानता हूँ कि ईमानदार संघर्ष किस्मत से आगे होता है। मैंने कई लोगों को बिना तैयारी के सिर्फ किस्मत से आगे बढ़ते देखा। मैं उन्हें गलत साबित करना चाहता हूँ।",
@@ -352,6 +388,12 @@ const translations: Record<Locale, TranslationKeys> = {
     "listening.notListening": "Сейчас ничего не слушаю",
     "listening.whileDrinking": "Под:",
     "listening.drink": "Карамельный макиато",
+    "pow.title": "Доказательство работы",
+    "pow.lastDays": "Последние {days} дней · {count} событий · старое в календаре",
+    "pow.openCalendar": "открыть календарь",
+    "pow.calendarUrl": "https://calendar.google.com/calendar/u/0/r",
+    "pow.empty":
+      "Пока нет событий. Подключи GitHub webhooks — и здесь появятся коммиты/PR/CI.",
     "philosophy.title": "Философия",
     "philosophy.body":
       "Здесь без прикрас — место для моих мыслей. Путь был тяжёлым, мне ещё много учиться, но я твёрдо верю: настоящая борьба побеждает удачу. Видел многих, кто оказался не там, где готовился, лишь по везению. Хочу доказать обратное.",
@@ -400,6 +442,12 @@ const translations: Record<Locale, TranslationKeys> = {
     "listening.notListening": "اب کچھ نہیں سن رہا",
     "listening.whileDrinking": "پیتے ہوئے:",
     "listening.drink": "کیریمل مکچیاتو",
+    "pow.title": "کام کا ثبوت",
+    "pow.lastDays": "پچھلے {days} دن · {count} ایونٹس · پرانا کیلنڈر میں",
+    "pow.openCalendar": "کیلنڈر کھولیں",
+    "pow.calendarUrl": "https://calendar.google.com/calendar/u/0/r",
+    "pow.empty":
+      "ابھی کوئی ایونٹ نہیں۔ GitHub webhooks جوڑیں تو commits/PR/CI یہاں نظر آئیں گے۔",
     "philosophy.title": "فلسفہ",
     "philosophy.body":
       "یہ حصہ خام ہے—یہاں میں اپنے خیالات لکھتا ہوں۔ میرا سفر سخت رہا، ابھی بہت کچھ سیکھنا ہے، لیکن میں یقین رکھتا ہوں کہ حقیقی جدوجہد قسمت سے آگے ہوتی ہے۔ میں نے بہت سے لوگوں کو بغیر تیاری کے محض قسمت سے آگے جاتے دیکھا۔ میں انہیں غلط ثابت کرنا چاہتا ہوں۔",

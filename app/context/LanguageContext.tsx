@@ -4,7 +4,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useState,
 } from "react";
 import {
@@ -34,13 +33,7 @@ type LanguageContextValue = {
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>("en");
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setLocaleState(getStoredLocale());
-    setMounted(true);
-  }, []);
+  const [locale, setLocaleState] = useState<Locale>(() => getStoredLocale());
 
   const setLocale = useCallback((next: Locale) => {
     setLocaleState(next);

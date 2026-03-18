@@ -91,18 +91,18 @@ export default function CardsSection() {
   useEffect(() => {
     const section = searchParams.get("section");
     if (section === "experience") {
-      setExperienceOpen(true);
       requestAnimationFrame(() => {
+        setExperienceOpen(true);
         document.getElementById("section-experience")?.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     } else if (section === "projects") {
-      setProjectsOpen(true);
       requestAnimationFrame(() => {
+        setProjectsOpen(true);
         document.getElementById("section-projects")?.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     } else if (section === "contact") {
-      setContactOpen(true);
       requestAnimationFrame(() => {
+        setContactOpen(true);
         document.getElementById("section-contact")?.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     }
