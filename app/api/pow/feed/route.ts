@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { listPowEventsLastDays } from "../../../lib/pow/db";
+import { listPowEventsRecent } from "../../../lib/pow/db";
 
-const DAYS = 4;
+/** How many latest events to show in the Proof of Work feed (not a rolling day window). */
+const EVENT_LIMIT = 4;
 
 function yyyyMmDd(d: Date): string {
   const y = d.getFullYear();
@@ -11,7 +12,7 @@ function yyyyMmDd(d: Date): string {
 }
 
 export async function GET() {
-  const rows = await listPowEventsLastDays(DAYS);
+  const rows = await listPowEventsRecent(EVENT_LIMIT);
 
   const grouped: Record<string, typeof rows> = {};
   for (const r of rows) {
@@ -31,9 +32,12 @@ export async function GET() {
       })),
     }));
 
+  const totalEvents = days.reduce((n, d) => n + d.events.length, 0);
+
   return NextResponse.json({
     days,
-    retentionDays: DAYS,
+    eventLimit: EVENT_LIMIT,
+    eventCount: totalEvents,
     calendarId: process.env.GOOGLE_CALENDAR_ID ?? null,
   });
 }

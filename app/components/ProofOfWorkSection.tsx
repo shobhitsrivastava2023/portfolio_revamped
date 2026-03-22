@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLanguage } from "../context/LanguageContext";
 
@@ -14,7 +14,8 @@ type PowFeed = {
       url: string;
     }>;
   }>;
-  retentionDays: number;
+  eventLimit: number;
+  eventCount: number;
   calendarId: string | null;
 };
 
@@ -61,11 +62,6 @@ export default function ProofOfWorkSection() {
     };
   }, []);
 
-  const total = useMemo(() => {
-    if (!feed) return 0;
-    return feed.days.reduce((acc, d) => acc + d.events.length, 0);
-  }, [feed]);
-
   return (
     <section className="w-full max-w-[562px]" style={{ marginTop: 70 }}>
       <div
@@ -84,9 +80,9 @@ export default function ProofOfWorkSection() {
               className="font-outfit font-medium opacity-90"
               style={{ marginTop: 6, fontSize: 14, letterSpacing: "-0.04em" }}
             >
-              {t("pow.lastDays")
-                .replace("{days}", String(feed?.retentionDays ?? 4))
-                .replace("{count}", String(total))}
+              {t("pow.summary")
+                .replace("{limit}", String(feed?.eventLimit ?? 4))
+                .replace("{count}", String(feed?.eventCount ?? 0))}
             </p>
           </div>
 

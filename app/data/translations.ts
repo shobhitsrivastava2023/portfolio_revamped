@@ -60,7 +60,7 @@ export type TranslationKeys = {
   "listening.drink": string;
   // Proof of Work
   "pow.title": string;
-  "pow.lastDays": string;
+  "pow.summary": string;
   "pow.openCalendar": string;
   "pow.calendarUrl": string;
   "pow.empty": string;
@@ -119,7 +119,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "listening.whileDrinking": "While Drinking to:",
     "listening.drink": "Caramel Macchiato",
     "pow.title": "Proof of Work",
-    "pow.lastDays": "Last {days} days · {count} events · older lives in Calendar",
+    "pow.summary": "Last {limit} events · {count} shown · older lives in Calendar",
     "pow.openCalendar": "open calendar",
     "pow.calendarUrl": "/api/pow/calendar",
     "pow.empty":
@@ -173,7 +173,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "listening.whileDrinking": "飲みながら:",
     "listening.drink": "キャラメルマキアート",
     "pow.title": "作業ログ",
-    "pow.lastDays": "直近 {days} 日 · {count} 件 · 過去分はカレンダーへ",
+    "pow.summary": "直近 {limit} 件 · {count} 件表示 · 過去分はカレンダーへ",
     "pow.openCalendar": "カレンダーを開く",
     "pow.calendarUrl": "/api/pow/calendar",
     "pow.empty":
@@ -227,7 +227,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "listening.whileDrinking": "En buvant :",
     "listening.drink": "Caramel Macchiato",
     "pow.title": "Preuve de travail",
-    "pow.lastDays": "{count} événements · {days} derniers jours · le reste est dans le calendrier",
+    "pow.summary": "Derniers {limit} événements · {count} affichés · le reste dans le calendrier",
     "pow.openCalendar": "ouvrir le calendrier",
     "pow.calendarUrl": "/api/pow/calendar",
     "pow.empty":
@@ -281,7 +281,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "listening.whileDrinking": "Mientras tomo:",
     "listening.drink": "Caramel Macchiato",
     "pow.title": "Prueba de trabajo",
-    "pow.lastDays": "Últimos {days} días · {count} eventos · lo anterior está en el calendario",
+    "pow.summary": "Últimos {limit} eventos · {count} mostrados · lo anterior está en el calendario",
     "pow.openCalendar": "abrir calendario",
     "pow.calendarUrl": "/api/pow/calendar",
     "pow.empty":
@@ -335,7 +335,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "listening.whileDrinking": "पीते हुए:",
     "listening.drink": "कैरामेल मकियातो",
     "pow.title": "काम का प्रमाण",
-    "pow.lastDays": "पिछले {days} दिन · {count} इवेंट्स · पुराने कैलेंडर में",
+    "pow.summary": "पिछले {limit} इवेंट · {count} दिखाए गए · पुराना कैलेंडर में",
     "pow.openCalendar": "कैलेंडर खोलें",
     "pow.calendarUrl": "/api/pow/calendar",
     "pow.empty":
@@ -389,7 +389,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "listening.whileDrinking": "Под:",
     "listening.drink": "Карамельный макиато",
     "pow.title": "Доказательство работы",
-    "pow.lastDays": "Последние {days} дней · {count} событий · старое в календаре",
+    "pow.summary": "Последние {limit} событий · показано {count} · архив в календаре",
     "pow.openCalendar": "открыть календарь",
     "pow.calendarUrl": "/api/pow/calendar",
     "pow.empty":
@@ -443,7 +443,7 @@ const translations: Record<Locale, TranslationKeys> = {
     "listening.whileDrinking": "پیتے ہوئے:",
     "listening.drink": "کیریمل مکچیاتو",
     "pow.title": "کام کا ثبوت",
-    "pow.lastDays": "پچھلے {days} دن · {count} ایونٹس · پرانا کیلنڈر میں",
+    "pow.summary": "پچھلے {limit} ایونٹس · {count} دکھائے گئے · پرانا کیلنڈر میں",
     "pow.openCalendar": "کیلنڈر کھولیں",
     "pow.calendarUrl": "/api/pow/calendar",
     "pow.empty":

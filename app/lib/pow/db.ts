@@ -68,6 +68,18 @@ export async function listPowEventsLastDays(days: number): Promise<StoredPowEven
   return rows;
 }
 
+/** Most recent events for the public feed (by count, not time window). */
+export async function listPowEventsRecent(limit: number): Promise<StoredPowEventRow[]> {
+  const q = sql();
+  const rows = (await q`
+    select id, occurred_at::text, created_at::text, source, repo, event_type, url, dedupe_key, meta
+    from pow_events
+    order by occurred_at desc
+    limit ${limit};
+  `) as StoredPowEventRow[];
+  return rows;
+}
+
 export async function deletePowEventsOlderThanDays(days: number): Promise<void> {
   const q = sql();
   await q`
