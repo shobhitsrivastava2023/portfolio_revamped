@@ -17,122 +17,31 @@ export const BLOGS: BlogPost[] = [
       <p>Every time you see a live notification, a real-time cursor, or a chat message appear without refreshing the page, WebSockets are probably involved. Most tutorials hand you Socket.io and call it a day. This post skips the library and goes straight to the protocol.</p>
   
       <h2>Why Not Just HTTP?</h2>
-      <p>HTTP is a request-response protocol. The client asks, the server answers, and the connection closes. That model works fine for fetching a webpage, but it breaks down the moment you need the server to push data to the client without the client asking first. Long-polling is the hack people used before WebSockets existed, and it is exactly as ugly as it sounds.</p>
-      <p>WebSockets solve this by keeping the connection open. One handshake, then both sides can send frames whenever they want.</p>
+      <p>HTTP is a request-response protocol. The client asks, the server answers, and the connection closes. That model works fine for fetching a webpage, but it falls apart the moment you need the server to push data without the client asking first. Long-polling was the workaround people used before WebSockets existed. The client would send a request, the server would hold it open until something happened, respond, and then the client would immediately send another request. It worked, barely, and it was expensive.</p>
+      <p>WebSockets solve this cleanly. One handshake, and both sides can send data whenever they want for as long as the connection stays open.</p>
   
       <h2>The Handshake</h2>
-      <p>A WebSocket connection starts as a plain HTTP request. The client sends an upgrade request that looks something like this:</p>
-      <pre><code>GET /chat HTTP/1.1
-  Host: example.com
-  Upgrade: websocket
-  Connection: Upgrade
-  Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
-  Sec-WebSocket-Version: 13</code></pre>
-      <p>The server responds with a 101 Switching Protocols status and a derived key to confirm the upgrade. The key derivation is not encryption, it is just a way to prove the server understood the request. The server takes the client key, appends a fixed GUID, SHA-1 hashes it, and base64 encodes the result.</p>
-      <pre><code>HTTP/1.1 101 Switching Protocols
-  Upgrade: websocket
-  Connection: Upgrade
-  Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=</code></pre>
-      <p>After this exchange, the HTTP connection is hijacked. Both sides are now speaking the WebSocket framing protocol over the same TCP connection.</p>
+      <p>A WebSocket connection does not start as a WebSocket connection. It starts as a plain HTTP request. The client sends a regular GET request but includes a special header signaling that it wants to upgrade the protocol. It also sends a randomly generated base64 key.</p>
+      <p>The server responds with a 101 Switching Protocols status. Before it does, it takes the client's key, appends a fixed magic string defined in the spec, runs a SHA-1 hash on the result, and sends back the base64 encoding of that hash. This is not encryption. It is just proof that the server genuinely understands the WebSocket protocol and is not accidentally replying to the wrong kind of request.</p>
+      <p>Once the client validates that response, the HTTP connection is handed over entirely. Both sides are now speaking WebSocket framing over the same TCP connection that started the conversation.</p>
   
-      <h2>Frames, Not Streams</h2>
-      <p>Data over a WebSocket is sent in frames. Each frame has a small binary header followed by the payload. The first byte encodes whether this is the final fragment of a message and what opcode it carries. The second byte encodes whether the payload is masked and the payload length.</p>
-      <p>Opcodes are worth knowing. <code>0x1</code> is a text frame, <code>0x2</code> is binary, <code>0x8</code> is a close frame, <code>0x9</code> is a ping, and <code>0xA</code> is a pong. The ping and pong opcodes are how both sides keep the connection alive and detect drops.</p>
-      <p>Client to server frames must be masked. This is a spec requirement, not optional. The client generates a 4 byte masking key and XORs each payload byte with the corresponding key byte cyclically. The server must unmask before reading. Server to client frames are never masked.</p>
+      <h2>Frames</h2>
+      <p>Data over a WebSocket travels in frames, not as a raw stream. Every message is wrapped in a small binary header before being sent across the wire. That header carries a few important pieces of information: whether this is the last fragment of a larger message, what type of data is inside, whether the payload is masked, and how long the payload is.</p>
+      <p>The type information is called an opcode. Text messages, binary messages, connection closes, pings, and pongs each have their own opcode. Ping and pong are built directly into the protocol as a keep-alive mechanism. Either side can send a ping at any time and the other side is expected to respond with a pong. This is how dropped connections get detected before either side tries to send real data into a void.</p>
   
-      <h2>Building It in Node With Just Net</h2>
-      <p>Node's built-in <code>net</code> module gives you raw TCP. The <code>http</code> module gives you access to the upgrade event. That is all you need.</p>
-      <pre><code>import http from "http";
-  import crypto from "crypto";
-  import { Socket } from "net";
+      <h2>Masking</h2>
+      <p>Every frame sent from a client to a server must be masked. This is not optional and it is not about security in the traditional sense. It exists to protect infrastructure. Older proxies and caches sitting between a client and a server were not built with WebSockets in mind. If unmasked data happened to look like an HTTP response, a caching proxy could store it and serve it to other users. Masking makes the payload look like noise to anything that does not understand the WebSocket protocol.</p>
+      <p>The client generates a four byte key and XORs each byte of the payload with the corresponding key byte, cycling through the key as needed. The server knows to reverse this before reading the message. Frames going from server to client are never masked.</p>
   
-  const GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+      <h2>Message Fragmentation</h2>
+      <p>Large messages do not have to be sent as one frame. The protocol supports fragmentation, where a single logical message is split across multiple frames. The first frame signals that more is coming, intermediate frames carry continuation opcodes, and the final frame sets a flag indicating the message is complete. The receiver reassembles them in order. This matters in practice because it allows a sender to start streaming data before it knows the full size of what it is sending.</p>
   
-  function generateAcceptKey(clientKey: string): string {
-    return crypto
-      .createHash("sha1")
-      .update(clientKey + GUID)
-      .digest("base64");
-  }
+      <h2>Closing the Connection</h2>
+      <p>Closing a WebSocket connection is a two step process. The side that wants to close sends a close frame, optionally with a status code and a reason. The other side responds with its own close frame, and then the underlying TCP connection is torn down. This graceful shutdown exists so neither side drops data that was already in flight when the decision to close was made.</p>
   
-  function unmask(payload: Buffer, mask: Buffer): Buffer {
-    const result = Buffer.allocUnsafe(payload.length);
-    for (let i = 0; i < payload.length; i++) {
-      result[i] = payload[i] ^ mask[i % 4];
-    }
-    return result;
-  }
-  
-  function parseFrame(buffer: Buffer): { opcode: number; payload: Buffer } | null {
-    if (buffer.length < 2) return null;
-  
-    const opcode = buffer[0] & 0x0f;
-    const isMasked = (buffer[1] & 0x80) !== 0;
-    let payloadLength = buffer[1] & 0x7f;
-    let offset = 2;
-  
-    if (payloadLength === 126) {
-      payloadLength = buffer.readUInt16BE(offset);
-      offset += 2;
-    } else if (payloadLength === 127) {
-      payloadLength = Number(buffer.readBigUInt64BE(offset));
-      offset += 8;
-    }
-  
-    const mask = isMasked ? buffer.slice(offset, offset + 4) : null;
-    if (isMasked) offset += 4;
-  
-    const payload = buffer.slice(offset, offset + payloadLength);
-    return { opcode, payload: mask ? unmask(payload, mask) : payload };
-  }
-  
-  function buildFrame(data: string): Buffer {
-    const payload = Buffer.from(data, "utf8");
-    const frame = Buffer.allocUnsafe(2 + payload.length);
-    frame[0] = 0x81; // FIN + text opcode
-    frame[1] = payload.length;
-    payload.copy(frame, 2);
-    return frame;
-  }
-  
-  const server = http.createServer();
-  
-  server.on("upgrade", (req, socket: Socket) => {
-    const clientKey = req.headers["sec-websocket-key"] as string;
-    const acceptKey = generateAcceptKey(clientKey);
-  
-    socket.write(
-      "HTTP/1.1 101 Switching Protocols\r\n" +
-      "Upgrade: websocket\r\n" +
-      "Connection: Upgrade\r\n" +
-      \`Sec-WebSocket-Accept: \${acceptKey}\r\n\` +
-      "\r\n"
-    );
-  
-    socket.on("data", (buffer) => {
-      const frame = parseFrame(buffer);
-      if (!frame) return;
-  
-      if (frame.opcode === 0x8) {
-        socket.end();
-        return;
-      }
-  
-      if (frame.opcode === 0x1) {
-        const message = frame.payload.toString("utf8");
-        console.log("Received:", message);
-        socket.write(buildFrame(\`echo: \${message}\`));
-      }
-    });
-  });
-  
-  server.listen(8080, () => console.log("Listening on port 8080"));</code></pre>
-  
-      <h2>What This Does Not Cover</h2>
-      <p>This is a single-connection echo server. It does not handle fragmented messages, extensions like permessage-deflate, or broadcasting across multiple sockets. Payload lengths above 125 bytes need extended length handling, and you will want proper close frame negotiation in production. But the core loop, handshake, frame parsing, masking, is all here and it runs with zero dependencies.</p>
-  
-      <h2>Why Bother?</h2>
-      <p>Socket.io is fine. Use it when it makes sense. But knowing what lives underneath means you can debug latency issues, optimize frame sizes, or implement the protocol in any language without reaching for a package. The spec is readable, the math is simple, and the payoff is a genuinely clear mental model of how real-time communication works at the wire level.</p>
+      <h2>Where Libraries Fit In</h2>
+      <p>Libraries like Socket.io are built on top of all of this. They add rooms, namespaces, automatic reconnection, and a fallback to long-polling when WebSockets are not available. That is genuinely useful. But they are abstractions over a protocol that is already fairly simple. Understanding the layer underneath means you can reason about latency, debug unexpected disconnects, implement the protocol in environments where no library exists, and make informed decisions about when a library is actually solving a problem versus adding weight.</p>
+      <p>The WebSocket spec is short and readable. The handshake is a few headers. The framing is a handful of bit manipulations. Everything else, broadcasts, rooms, presence, is application logic that you build on top.</p>
     `,
   },
   {
