@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og";
 import { getDrawerItem } from "../../lib/drawer/db";
 import { formatDrawerDate } from "../../lib/drawer/format";
 import { loadOutfit } from "../../lib/og";
+import { parseArticle, articleTitle } from "../../lib/drawer/article";
 
 export const alt = "From Shobhit's drawer";
 export const size = { width: 1200, height: 630 };
@@ -66,6 +67,24 @@ export default async function DrawerItemImage({ params }: { params: Promise<{ id
             ))}
           </div>
           <div style={{ display: "flex", marginTop: 28, fontSize: 28, opacity: 0.7 }}>{footer}</div>
+        </div>
+      ),
+      { ...size, fonts }
+    );
+  }
+
+  // Article: its title, big, on dark.
+  if (item?.kind === "article") {
+    const title = articleTitle(item.body);
+    const { minutes } = parseArticle(item.body);
+    return new ImageResponse(
+      (
+        <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: DARK, color: CREAM, padding: 64, fontFamily }}>
+          <div style={{ display: "flex", fontSize: 30, color: ORANGE, letterSpacing: "-0.04em" }}>{`an article · ${minutes} min read`}</div>
+          <div style={{ display: "flex", marginTop: 28, fontSize: title.length > 60 ? 64 : 84, letterSpacing: "-0.06em", lineHeight: 1.05 }}>
+            {title}
+          </div>
+          <div style={{ display: "flex", marginTop: "auto", fontSize: 28, opacity: 0.7 }}>{footer}</div>
         </div>
       ),
       { ...size, fonts }

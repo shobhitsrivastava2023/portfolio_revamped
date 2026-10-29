@@ -6,6 +6,9 @@ import { t } from "../../data/strings";
 import SongPlayer from "./SongPlayer";
 import ClipPlayer from "./ClipPlayer";
 import ShareButton from "./ShareButton";
+import ArticleView from "./ArticleView";
+import StoryButton from "./StoryButton";
+import { articleTitle } from "../../lib/drawer/article";
 
 function Photos({ item }: { item: DrawerItem }) {
   const photos = item.media;
@@ -35,9 +38,11 @@ function Photos({ item }: { item: DrawerItem }) {
   );
 }
 
-/** The item itself: a thought, photos, a clip or a song. */
-export function DrawerContent({ item }: { item: DrawerItem }) {
+/** The item itself: a thought, an article, photos, a clip or a song. `truncate` cuts long articles (feed). */
+export function DrawerContent({ item, truncate = false }: { item: DrawerItem; truncate?: boolean }) {
   switch (item.kind) {
+    case "article":
+      return <ArticleView body={item.body} truncate={truncate} />;
     case "thought":
       return (
         <div className="w-full rounded-[10px] border-2 border-[#323232] p-5 max-[562px]:p-4">
@@ -61,7 +66,8 @@ export function DrawerContent({ item }: { item: DrawerItem }) {
 /** One item in the feed or on its own page: content, caption, then date · tags · share. */
 export default function DrawerEntry({ item, linkDate = true }: { item: DrawerItem; linkDate?: boolean }) {
   const date = formatDrawerDate(item.createdAt);
-  const caption = item.kind !== "thought" ? item.body : null;
+  const caption = item.kind === "thought" || item.kind === "article" ? null : item.body;
+  const shareTitle = item.kind === "article" ? articleTitle(item.body) : item.body?.slice(0, 80) ?? "drawer";
   return (
     <article className="w-full">
       {item.pinned && (
@@ -69,7 +75,7 @@ export default function DrawerEntry({ item, linkDate = true }: { item: DrawerIte
           {t("drawer.pinned")}
         </p>
       )}
-      <DrawerContent item={item} />
+      <DrawerContent item={item} truncate={linkDate} />
       {caption && (
         <p className="mt-3 whitespace-pre-line text-[#323232]" style={{ fontSize: 15, lineHeight: 1.45 }}>
           {caption}
@@ -89,8 +95,9 @@ export default function DrawerEntry({ item, linkDate = true }: { item: DrawerIte
         {item.tags.map((tag) => (
           <span key={tag}>#{tag}</span>
         ))}
-        <span className="ml-auto">
-          <ShareButton path={`/drawer/${item.id}`} title={item.body?.slice(0, 80) ?? "drawer"} />
+        <span className="ml-auto flex items-center gap-3">
+          <StoryButton id={item.id} />
+          <ShareButton path={`/drawer/${item.id}`} title={shareTitle} />
         </span>
       </footer>
     </article>

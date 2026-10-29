@@ -10,11 +10,12 @@ const MAX_PHOTOS = 4;
 const buttonClass =
   "min-h-[40px] rounded-[10px] border-0 px-4 font-outfit font-semibold cursor-pointer transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50";
 
-/** What a post becomes, from the files attached to it. */
-function kindFor(files: File[]): DrawerKind {
+/** What a post becomes, from the files attached to it (and #article for text). */
+function kindFor(files: File[], text = ""): DrawerKind {
   if (files.some((f) => f.type.startsWith("audio/"))) return "audio";
   if (files.some((f) => f.type.startsWith("video/"))) return "video";
-  return files.length ? "photo" : "thought";
+  if (files.length) return "photo";
+  return /(^|\s)#article\b/i.test(text) ? "article" : "thought";
 }
 
 async function imageSize(file: File): Promise<{ width: number; height: number }> {
@@ -66,7 +67,7 @@ function Composer({ onPosted }: { onPosted: (item: DrawerItem) => void }) {
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
-  const kind = kindFor(files);
+  const kind = kindFor(files, text);
 
   const pickFiles = (list: FileList | null) => {
     const picked = Array.from(list ?? []).filter((f) => /^(image|video|audio)\//.test(f.type));
@@ -119,7 +120,7 @@ function Composer({ onPosted }: { onPosted: (item: DrawerItem) => void }) {
     }
   };
 
-  const canPost = !busy && (kind === "thought" ? text.trim().length > 0 : files.length > 0);
+  const canPost = !busy && (kind === "thought" || kind === "article" ? text.trim().length > 0 : files.length > 0);
 
   return (
     <section className="mt-8 rounded-[10px] bg-[#323232] p-4 text-[#FFE7D0]">

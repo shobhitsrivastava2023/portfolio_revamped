@@ -2,6 +2,7 @@ import { createDrawerItem, upsertDrawerGroupItem } from "./db";
 import { newObjectKey, publicUrl, putObject } from "./r2";
 import { extractTags, stripTrailingTags, type DrawerItem, type DrawerKind, type DrawerMedia } from "./types";
 import { SITE_URL } from "../site";
+import { stripArticleTag } from "./article";
 
 /** Telegram's bot API only lets bots download files up to 20 MB. */
 const MAX_BOT_FILE_BYTES = 20 * 1024 * 1024;
@@ -54,6 +55,27 @@ export type TgUpdate = { message?: TgMessage };
 
 type Incoming = { kind: DrawerKind; file: TgFile; mime: string; meta: Omit<DrawerMedia, "key" | "url" | "mime"> };
 
+const MIME_BY_EXTENSION: Record<string, string> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  gif: "image/gif",
+  heic: "image/heic",
+  mp4: "video/mp4",
+  mov: "video/quicktime",
+  webm: "video/webm",
+  mp3: "audio/mpeg",
+  wav: "audio/wav",
+  m4a: "audio/mp4",
+  ogg: "audio/ogg",
+  flac: "audio/flac",
+};
+
+function mimeFromName(name?: string): string | undefined {
+  return MIME_BY_EXTENSION[name?.split(".").pop()?.toLowerCase() ?? ""];
+}
+
 /** Work out what kind of drawer item a message is, and which file to fetch. */
 function classify(m: TgMessage): Incoming | null {
   if (m.photo?.length) {
@@ -81,19 +103,21 @@ function classify(m: TgMessage): Incoming | null {
   if (m.voice) {
     return { kind: "audio", file: m.voice, mime: m.voice.mime_type ?? "audio/ogg", meta: { duration: m.voice.duration, title: "voice note" } };
   }
-  // Files sent "as file" (uncompressed photos, .wav songs, original-quality videos)
+  // Files sent "as file" (uncompressed photos, .wav songs, original-quality videos).
+  // Telegram doesn't always label them, so fall back to the file extension.
   const d = m.document;
-  if (d?.mime_type) {
-    const kind: DrawerKind | null = d.mime_type.startsWith("image/")
+  const mime = d && (d.mime_type && d.mime_type !== "application/octet-stream" ? d.mime_type : mimeFromName(d.file_name));
+  if (d && mime) {
+    const kind: DrawerKind | null = mime.startsWith("image/")
       ? "photo"
-      : d.mime_type.startsWith("video/")
+      : mime.startsWith("video/")
         ? "video"
-        : d.mime_type.startsWith("audio/")
+        : mime.startsWith("audio/")
           ? "audio"
           : null;
     if (kind) {
       const title = kind === "audio" ? d.file_name?.replace(/\.[^.]+$/, "") : undefined;
-      return { kind, file: d, mime: d.mime_type, meta: { title } };
+      return { kind, file: d, mime, meta: { title } };
     }
   }
   return null;
@@ -130,17 +154,57 @@ export async function handleTelegramUpdate(update: TgUpdate): Promise<void> {
     await reply(
       m.chat.id,
       m.message_id,
-      "Send me a thought, photo, video or song (mp3/wav) and it goes into your drawer. Add #tags at the end of the caption. Files over 20 MB: use /drawer/admin."
+      [
+        "Send me a thought, photo, video or song (mp3/wav) and it goes into your drawer. Add #tags at the end of the caption.",
+        "Articles: add #article. Lines starting with -> are headings, ('image link') on its own line is an image, every other line is a paragraph. Longer than one message? Send it as a .txt file.",
+        "Files over 20 MB: use /drawer/admin.",
+      ].join("\n\n")
     );
     return;
   }
 
+  try {
+    await saveMessage(m, text);
+  } catch (err) {
+    // Never fail silently: tell the sender what went wrong.
+    console.error("drawer telegram: saving failed", err);
+    await reply(m.chat.id, m.message_id, `Couldn't save that: ${(err as Error).message.slice(0, 200)}`).catch(() => {});
+  }
+}
+
+/** Text content of a .txt/.md file sent to the bot. */
+async function downloadText(file: TgFile): Promise<string> {
+  const { file_path } = await telegramApi<{ file_path: string }>("getFile", { file_id: file.file_id });
+  const res = await fetch(`https://api.telegram.org/file/bot${token()}/${file_path}`);
+  if (!res.ok) throw new Error(`Telegram file download failed: ${res.status}`);
+  return res.text();
+}
+
+async function saveMessage(m: TgMessage, text: string | null): Promise<void> {
   const body = stripTrailingTags(text);
   const tags = extractTags(text);
   const incoming = classify(m);
 
+  // Articles: text marked #article, or a .txt/.md file (for anything past Telegram's 4096-character message limit).
+  const textFile = m.document && /\.(txt|md)$/i.test(m.document.file_name ?? "") ? m.document : null;
+  if (textFile || (!incoming && tags.includes("article"))) {
+    const source = textFile ? await downloadText(textFile) : (text ?? "");
+    const articleBody = stripTrailingTags(stripArticleTag(source));
+    if (!articleBody) {
+      await reply(m.chat.id, m.message_id, "That article is empty.");
+      return;
+    }
+    const articleTags = [...new Set([...tags, ...extractTags(source)])].filter((t) => t !== "article");
+    const item = await createDrawerItem({ kind: "article", body: articleBody, media: [], tags: articleTags, source: "telegram" });
+    await reply(m.chat.id, m.message_id, `article in the drawer → ${itemLink(item)}`);
+    return;
+  }
+
   if (!incoming) {
-    if (!body) return;
+    if (!body) {
+      await reply(m.chat.id, m.message_id, "I can't put that in the drawer. Send text, a photo, a video, or an audio file.");
+      return;
+    }
     const item = await createDrawerItem({ kind: "thought", body, media: [], tags, source: "telegram" });
     await reply(m.chat.id, m.message_id, `in the drawer → ${itemLink(item)}`);
     return;

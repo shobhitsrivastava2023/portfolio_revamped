@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAdmin } from "../../../lib/drawer/auth";
 import { createDrawerItem, listAllDrawerItems } from "../../../lib/drawer/db";
 import { publicUrl } from "../../../lib/drawer/r2";
+import { stripArticleTag } from "../../../lib/drawer/article";
 import { revalidateDrawer } from "../../../lib/drawer/revalidate";
 import {
   DRAWER_KINDS,
@@ -35,14 +36,16 @@ export async function POST(request: NextRequest) {
   if (!input.kind || !DRAWER_KINDS.includes(input.kind)) {
     return NextResponse.json({ error: "Unknown kind" }, { status: 400 });
   }
-  const body = input.body?.trim() || null;
+  const raw = input.body?.trim() || null;
+  const body = input.kind === "article" && raw ? stripArticleTag(raw) : raw;
   const media = (input.media ?? [])
     .filter((m) => typeof m.key === "string" && m.key.startsWith("drawer/"))
     // Rebuild the public URL server-side rather than trusting the client's.
     .map((m) => ({ ...m, url: publicUrl(m.key) }));
 
-  if (input.kind === "thought" ? !body : media.length === 0) {
-    return NextResponse.json({ error: input.kind === "thought" ? "Write something" : "Add a file" }, { status: 400 });
+  const textOnly = input.kind === "thought" || input.kind === "article";
+  if (textOnly ? !body : media.length === 0) {
+    return NextResponse.json({ error: textOnly ? "Write something" : "Add a file" }, { status: 400 });
   }
 
   const item = await createDrawerItem({
@@ -50,7 +53,7 @@ export async function POST(request: NextRequest) {
     body,
     media,
     waveform: input.kind === "audio" ? input.waveform ?? null : null,
-    tags: [...new Set([...(input.tags ?? []), ...extractTags(body)])],
+    tags: [...new Set([...(input.tags ?? []), ...extractTags(raw)])].filter((t) => t !== "article"),
     visibility: input.visibility && DRAWER_VISIBILITIES.includes(input.visibility) ? input.visibility : "public",
     source: "admin",
   });

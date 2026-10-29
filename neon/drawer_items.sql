@@ -4,7 +4,7 @@
 create table if not exists public.drawer_items (
   id text primary key,                       -- short random id, used in /drawer/<id>
   created_at timestamptz not null default now(),
-  kind text not null check (kind in ('thought', 'photo', 'video', 'audio')),
+  kind text not null check (kind in ('thought', 'article', 'photo', 'video', 'audio')),
   body text,                                 -- the thought, or the caption for media
   media jsonb not null default '[]'::jsonb,  -- [{ key, url, mime, width?, height?, duration?, title? }]
   waveform jsonb,                            -- audio only: ~160 peaks between 0 and 1

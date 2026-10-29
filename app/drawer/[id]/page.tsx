@@ -7,6 +7,7 @@ import DrawerEntry from "../../components/drawer/DrawerEntry";
 import { getDrawerItem } from "../../lib/drawer/db";
 import { formatDrawerDate } from "../../lib/drawer/format";
 import type { DrawerItem } from "../../lib/drawer/types";
+import { articleTitle } from "../../lib/drawer/article";
 import { t } from "../../data/strings";
 
 export const revalidate = 300;
@@ -23,6 +24,7 @@ async function load(id: string): Promise<DrawerItem | null> {
 
 /** Title for link previews: the text itself, or what the item is. */
 function previewTitle(item: DrawerItem): string {
+  if (item.kind === "article") return articleTitle(item.body);
   if (item.body) return item.body.length > 70 ? `${item.body.slice(0, 67)}...` : item.body;
   if (item.kind === "audio") return item.media[0]?.title || "a song";
   return item.kind === "photo" ? "a photo" : "a clip";

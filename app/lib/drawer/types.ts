@@ -1,4 +1,4 @@
-export type DrawerKind = "thought" | "photo" | "video" | "audio";
+export type DrawerKind = "thought" | "article" | "photo" | "video" | "audio";
 export type DrawerVisibility = "public" | "unlisted" | "draft";
 
 /** One stored file (photo, clip or song) in R2. */
@@ -28,7 +28,7 @@ export type DrawerItem = {
   source: "admin" | "telegram";
 };
 
-export const DRAWER_KINDS: DrawerKind[] = ["thought", "photo", "video", "audio"];
+export const DRAWER_KINDS: DrawerKind[] = ["thought", "article", "photo", "video", "audio"];
 export const DRAWER_VISIBILITIES: DrawerVisibility[] = ["public", "unlisted", "draft"];
 
 /** "#music #life" in a caption → ["music", "life"] (lowercased, unique). */

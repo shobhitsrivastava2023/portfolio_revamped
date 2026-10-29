@@ -51,6 +51,8 @@ export const STRINGS = {
   "drawer.pinned": "pinned",
   "drawer.share": "share",
   "drawer.copied": "link copied",
+  "drawer.story": "share as story",
+  "drawer.storyBusy": "making the card...",
   "drawer.more": "more in the drawer",
   "drawer.untitled": "untitled",
   // Beyond Code

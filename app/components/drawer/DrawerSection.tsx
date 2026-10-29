@@ -5,6 +5,7 @@ import { formatDrawerDate } from "../../lib/drawer/format";
 import { t } from "../../data/strings";
 import SongPlayer from "./SongPlayer";
 import ClipPlayer from "./ClipPlayer";
+import { parseArticle } from "../../lib/drawer/article";
 
 const linkClass =
   "block h-full no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#323232] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFE7D0] rounded-[10px]";
@@ -27,6 +28,29 @@ function Tile({ item }: { item: DrawerItem }) {
           </div>
         </Link>
       );
+    case "article": {
+      const { title, blocks } = parseArticle(item.body);
+      const opening = blocks.find((b) => b.type === "paragraph");
+      return (
+        <Link href={href} className={linkClass}>
+          <div className="relative h-full overflow-hidden rounded-[10px] bg-[#323232] p-3 text-[#FFE7D0] transition-opacity hover:opacity-95">
+            <p className="font-outfit font-medium text-[#FC6E20]" style={{ fontSize: 11, letterSpacing: "-0.01em" }}>
+              article
+            </p>
+            <p className="mt-1 font-outfit font-medium" style={{ fontSize: 17, letterSpacing: "-0.05em", lineHeight: 1.1 }}>
+              {title ?? "untitled"}
+            </p>
+            {opening?.type === "paragraph" && (
+              <p className="mt-2 opacity-80" style={{ fontSize: 12, lineHeight: 1.45 }}>
+                {opening.text}
+              </p>
+            )}
+            {/* Fade the overflow into the card */}
+            <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-14" style={{ background: "linear-gradient(to bottom, rgba(50,50,50,0), #323232)" }} />
+          </div>
+        </Link>
+      );
+    }
     case "photo":
       return m ? (
         <Link href={href} className={linkClass} aria-label={item.body ?? "photo"}>
