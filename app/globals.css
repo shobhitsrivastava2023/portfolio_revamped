@@ -67,6 +67,55 @@ body {
   }
 }
 
+/* Content fades into the background at the bottom of the screen, on every page */
+.bottom-fade {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 30;
+  height: calc(80px + env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+
+.bottom-fade-fill {
+  background: linear-gradient(
+    to top,
+    var(--background) 0%,
+    color-mix(in srgb, var(--background) 75%, transparent) 35%,
+    color-mix(in srgb, var(--background) 30%, transparent) 70%,
+    transparent 100%
+  );
+}
+
+/* Faint warm glow inside the fade: drifts side to side and breathes */
+.bottom-fade-haze {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 35% 90% at 50% 100%, rgb(252 110 32 / 0.16), transparent 70%);
+  background-size: 200% 100%;
+  animation:
+    haze-drift 18s ease-in-out infinite alternate,
+    haze-breathe 7s ease-in-out infinite alternate;
+}
+
+@keyframes haze-drift {
+  from {
+    background-position: 0% 0%;
+  }
+  to {
+    background-position: 100% 0%;
+  }
+}
+
+@keyframes haze-breathe {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .font-outfit {
   font-family: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
 }

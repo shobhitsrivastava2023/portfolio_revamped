@@ -10,7 +10,6 @@ export const STRINGS = {
   "nav.openMenu": "Open menu",
   "nav.closeMenu": "Close menu",
   // Hero
-  "hero.greeting": "hey there!",
   "hero.intro": "i'm shobhit. i build backends, full-stack apps and AI systems.",
   "hero.cta": "graduated in 2026, looking for my next full-time role.",
   // Status card (right column, next to experience)
@@ -22,17 +21,14 @@ export const STRINGS = {
   "cards.inAHurry": "in a hurry?",
   "cards.downloadResume": "download resume",
   "cards.experience": "Experience",
-  "cards.experienceGraduating": "Graduated: 2026, B.Tech IT",
-  "cards.experienceWorkedAt": "Worked at: Skaya + 24 freelance projects",
-  "cards.experienceDomain": "Main Domain: Backend, Full-Stack & AI",
-  // Shorter tl;dr lines for phones, where each card is half the screen wide
-  "cards.experienceGraduatingShort": "B.Tech IT, 2026",
-  "cards.experienceWorkedAtShort": "Skaya + freelance",
-  "cards.experienceDomainShort": "Backend & AI",
+  "cards.experienceAi": "AI Engineering",
+  "cards.experienceFullStack": "FullStack Development",
+  "cards.experienceDistributed": "Distributed Systems",
   "cards.projects": "Projects",
   "cards.projectsRepos": "github repos: {count}",
   "cards.projectsLeetcode": "leetcode: 1819 (top 7%)",
   "cards.projectsOpenSource": "open source: 3 orgs",
+  // Shorter tl;dr lines for phones, where each card is half the screen wide
   "cards.projectsReposShort": "{count} repos",
   "cards.projectsLeetcodeShort": "LeetCode 1819",
   "cards.projectsOpenSourceShort": "3 open source orgs",

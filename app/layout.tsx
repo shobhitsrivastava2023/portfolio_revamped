@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Outfit, Urbanist } from "next/font/google";
 import "./globals.css";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "./lib/site";
+import BottomFade from "./components/BottomFade";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -56,6 +57,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         {children}
+        <BottomFade />
       </body>
     </html>
   );

@@ -673,16 +673,9 @@ export default function CardsSection({ repoCount }: { repoCount: number }) {
           marginTop={35}
           tldr={
             <>
-              <p>{t("cards.experienceGraduating")}</p>
-              <p>{t("cards.experienceWorkedAt")}</p>
-              <p>{t("cards.experienceDomain")}</p>
-            </>
-          }
-          tldrPhone={
-            <>
-              <p>{t("cards.experienceGraduatingShort")}</p>
-              <p>{t("cards.experienceWorkedAtShort")}</p>
-              <p>{t("cards.experienceDomainShort")}</p>
+              <p>{t("cards.experienceAi")}</p>
+              <p>{t("cards.experienceFullStack")}</p>
+              <p>{t("cards.experienceDistributed")}</p>
             </>
           }
         />
