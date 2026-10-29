@@ -54,7 +54,7 @@ export default function Hero() {
       <div className="relative flex w-[281px] max-[562px]:w-full max-[562px]:justify-start min-[563px]:justify-end max-[562px]:aspect-224/200 max-[562px]:max-h-[220px]">
         {/* Desktop / larger viewports: original hero photo */}
         <Image
-          src="/hero.jpg"
+          src="/profile_portfolio.jpeg"
           alt="Portrait"
           width={224}
           height={272}
@@ -63,7 +63,7 @@ export default function Hero() {
         />
         {/* Mobile view: alternate hero image */}
         <Image
-          src="/hero2.png"
+          src="/profile_portfolio.jpeg"
           alt="Portrait"
           width={224}
           height={272}

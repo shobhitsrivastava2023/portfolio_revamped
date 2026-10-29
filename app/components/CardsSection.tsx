@@ -144,47 +144,203 @@ const ITEM_VARIANTS = {
   shown: { opacity: 1, y: 0, transition: { duration: 0.35, ease: EASE } },
 };
 
-/** The 2x2 grid of project tiles shown when the Projects card is open. */
-function ProjectTiles() {
+const EXPAND = {
+  initial: { height: 0, opacity: 0 },
+  animate: { height: "auto", opacity: 1 },
+  exit: { height: 0, opacity: 0 },
+  transition: { duration: 0.35, ease: EASE },
+};
+
+/** Background of an open project tile and its details strip (text flips to cream on it). */
+const TILE_SHADE = "#323232";
+
+type ProjectItem = (typeof PROJECTS)[number];
+
+/**
+ * One project in the open Projects panel. Cover and name link to the write-up;
+ * the "details" toggle opens a full-width strip under the row (ProjectDetails).
+ * While open, the tile takes the darker shade and squares off its bottom so the
+ * two read as one L-shaped block, the same way the big cards join their panels.
+ */
+function ProjectTile({
+  project,
+  open,
+  onToggle,
+}: {
+  project: ProjectItem;
+  open: boolean;
+  onToggle: () => void;
+}) {
+  const href = `/projects/${project.slug}?from=projects`;
   return (
-    <motion.ul
-      className="m-0 grid list-none grid-cols-2 gap-4 p-0 max-[480px]:grid-cols-1"
-      initial="hidden"
-      animate="shown"
-      variants={LIST_VARIANTS}
+    <motion.div
+      className={`min-w-0 p-2.5 ${open ? "flex-1" : ""}`}
+      style={{ borderTopLeftRadius: 10, borderTopRightRadius: 10 }}
+      initial={false}
+      animate={{
+        backgroundColor: open ? TILE_SHADE : "rgba(50, 50, 50, 0)",
+        borderBottomLeftRadius: open ? 0 : 10,
+        borderBottomRightRadius: open ? 0 : 10,
+      }}
+      transition={{ duration: 0.2, ease: EASE }}
     >
-      {PROJECTS.map((project) => (
-        <motion.li key={project.slug} variants={ITEM_VARIANTS} whileHover={{ y: -4 }}>
-          <Link
-            href={`/projects/${project.slug}?from=projects`}
-            className="group block rounded-[10px] no-underline text-[#323232] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#323232] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FC6E20]"
+      <motion.div whileHover={{ y: -4 }}>
+        <Link
+          href={href}
+          className={`group block rounded-[10px] no-underline transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
+            open
+              ? "text-[#FFE7D0] focus-visible:ring-[#FFE7D0] focus-visible:ring-offset-[#323232]"
+              : "text-[#323232] focus-visible:ring-[#323232] focus-visible:ring-offset-[#FC6E20]"
+          }`}
+        >
+          <ViewTransition name={`project-cover-${project.slug}`}>
+            <div className="@container relative aspect-16/10 w-full overflow-hidden rounded-[8px] shadow-[0_0_0_1px_rgba(50,50,50,0.15)] transition-shadow group-hover:shadow-[0_8px_20px_-8px_rgba(50,50,50,0.6)]">
+              <ProjectCover project={project} size="card" sizes="(max-width: 562px) 50vw, 265px" />
+            </div>
+          </ViewTransition>
+          <p
+            className="mt-3 flex items-center gap-1 font-outfit font-medium"
+            style={{ fontSize: "clamp(15px, 3.56cqw, 20px)", letterSpacing: "-0.06em", lineHeight: 1.1 }}
           >
-            <ViewTransition name={`project-cover-${project.slug}`}>
-              <div className="relative aspect-16/10 w-full overflow-hidden rounded-[8px] shadow-[0_0_0_1px_rgba(50,50,50,0.15)] transition-shadow group-hover:shadow-[0_8px_20px_-8px_rgba(50,50,50,0.6)]">
-                <ProjectCover
-                  project={project}
-                  size="card"
-                  sizes="(max-width: 480px) 100vw, (max-width: 562px) 50vw, 265px"
-                />
+            {project.name}
+            <ExternalLinkIcon className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100" />
+          </p>
+          <p className="mt-1.5 leading-snug opacity-90" style={{ fontSize: "clamp(11px, 2.14cqw, 12px)", letterSpacing: "-0.02em" }}>
+            {project.tagline}
+          </p>
+        </Link>
+      </motion.div>
+
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        aria-controls={`project-details-${project.slug}`}
+        className={`mt-3 inline-flex min-h-[32px] items-center gap-1.5 rounded-[6px] border-0 px-2.5 font-outfit font-medium cursor-pointer touch-manipulation transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
+          open
+            ? "bg-[#FFE7D0]/12 text-[#FFE7D0] hover:bg-[#FFE7D0]/20 focus-visible:ring-[#FFE7D0] focus-visible:ring-offset-[#323232]"
+            : "bg-[#323232]/10 text-[#323232] hover:bg-[#323232]/20 focus-visible:ring-[#323232] focus-visible:ring-offset-[#FC6E20]"
+        }`}
+        style={{ fontSize: 12, letterSpacing: "-0.03em" }}
+      >
+        {open ? t("projects.lessDetails") : t("projects.details")}
+        <ChevronDown className={open ? "text-[#FFE7D0]" : "text-[#323232]"} rotate={open} />
+      </button>
+    </motion.div>
+  );
+}
+
+/**
+ * Full-width strip under a row of tiles with the open project's description.
+ * `side` is the column of the open tile; the fillet rounds the inside corner.
+ */
+function ProjectDetails({ project, side }: { project: ProjectItem | null; side: "left" | "right" }) {
+  // Each tile is half the row minus half the column gap (--tile-gap, set on the row).
+  const tileWidth = "calc(50% - var(--tile-gap) / 2)";
+  const fillet =
+    side === "left"
+      ? { left: tileWidth, background: `radial-gradient(circle at 100% 0, transparent 10px, ${TILE_SHADE} 10.5px)` }
+      : { right: tileWidth, background: `radial-gradient(circle at 0 0, transparent 10px, ${TILE_SHADE} 10.5px)` };
+  return (
+    <div className="relative col-span-2">
+      <AnimatePresence initial={false}>
+        {project && (
+          <motion.div
+            key="fillet"
+            aria-hidden
+            className="absolute"
+            style={{ top: -10, width: 10, height: 10, ...fillet }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          />
+        )}
+        {project && (
+          <motion.div
+            key="details"
+            id={`project-details-${project.slug}`}
+            initial={{ height: 0 }}
+            animate={{ height: "auto" }}
+            exit={{ height: 0 }}
+            transition={EXPAND.transition}
+            className="overflow-hidden text-[#FFE7D0]"
+            style={{
+              backgroundColor: TILE_SHADE,
+              borderRadius: side === "left" ? "0 10px 10px 10px" : "10px 0 10px 10px",
+            }}
+          >
+            <div className="p-4 max-[562px]:p-3.5">
+              <p className="leading-relaxed" style={{ fontSize: 13, letterSpacing: "-0.01em" }}>
+                {project.description}
+              </p>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-[#FFE7D0]/15 pt-3">
+                <p className="opacity-75" style={{ fontSize: 11, letterSpacing: "normal" }}>
+                  {project.stack}
+                </p>
+                <Link
+                  href={`/projects/${project.slug}?from=projects`}
+                  className="inline-flex min-h-[32px] items-center gap-1 font-outfit font-medium text-[#FFE7D0] underline decoration-[#FC6E20] decoration-2 underline-offset-4 hover:opacity-80"
+                  style={{ fontSize: 12, letterSpacing: "-0.03em" }}
+                >
+                  {t("projects.readWriteup")}
+                  <ExternalLinkIcon />
+                </Link>
               </div>
-            </ViewTransition>
-            <p
-              className="mt-3 flex items-center gap-1 font-outfit font-medium"
-              style={{ fontSize: 20, letterSpacing: "-0.06em", lineHeight: 1.1 }}
-            >
-              {project.name}
-              <ExternalLinkIcon className="opacity-0 transition-opacity group-hover:opacity-100" />
-            </p>
-            <p className="mt-1 leading-snug" style={{ fontSize: 12, letterSpacing: "-0.02em" }}>
-              {project.tagline}
-            </p>
-            <p className="mt-1 opacity-75" style={{ fontSize: 10, letterSpacing: "normal" }}>
-              {project.stack}
-            </p>
-          </Link>
-        </motion.li>
-      ))}
-    </motion.ul>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/** Keeps a 12px gap between a closed tile and the details strip of its neighbour. */
+function TileGap({ active }: { active: boolean }) {
+  return (
+    <motion.div
+      aria-hidden
+      className="shrink-0"
+      initial={false}
+      animate={{ height: active ? 12 : 0 }}
+      transition={{ duration: 0.35, ease: EASE }}
+    />
+  );
+}
+
+/** Projects in rows of two, each row followed by its details strip. One project open at a time. */
+function ProjectTiles() {
+  const [openSlug, setOpenSlug] = useState<string | null>(null);
+  const rows: ProjectItem[][] = [];
+  for (let i = 0; i < PROJECTS.length; i += 2) rows.push(PROJECTS.slice(i, i + 2));
+
+  return (
+    <motion.div className="flex flex-col gap-3" initial="hidden" animate="shown" variants={LIST_VARIANTS}>
+      {rows.map((row) => {
+        const openIndex = row.findIndex((p) => p.slug === openSlug);
+        return (
+          <div
+            key={row[0].slug}
+            className="grid grid-cols-2 gap-x-[var(--tile-gap)] [--tile-gap:8px]"
+          >
+            {row.map((project, i) => (
+              <motion.div key={project.slug} className="flex min-w-0 flex-col" variants={ITEM_VARIANTS}>
+                <ProjectTile
+                  project={project}
+                  open={openIndex === i}
+                  onToggle={() => setOpenSlug(openSlug === project.slug ? null : project.slug)}
+                />
+                <TileGap active={openIndex !== -1 && openIndex !== i} />
+              </motion.div>
+            ))}
+            <ProjectDetails
+              project={openIndex === -1 ? null : row[openIndex]}
+              side={openIndex === 1 ? "right" : "left"}
+            />
+          </div>
+        );
+      })}
+    </motion.div>
   );
 }
 
@@ -267,13 +423,6 @@ function ContactLinks() {
   );
 }
 
-const EXPAND = {
-  initial: { height: 0, opacity: 0 },
-  animate: { height: "auto", opacity: 1 },
-  exit: { height: 0, opacity: 0 },
-  transition: { duration: 0.35, ease: EASE },
-};
-
 /**
  * An accordion card. It never moves: its contents open in a full-width
  * ExpandPanel underneath, and the card squares off its bottom corners to join
@@ -290,6 +439,7 @@ function ExpandCard({
   widthClass,
   marginTop,
   tldr,
+  tldrPhone,
 }: {
   id: string;
   panelId: string;
@@ -302,6 +452,8 @@ function ExpandCard({
   widthClass: string;
   marginTop: number;
   tldr: ReactNode;
+  /** Shorter tl;dr for phones; falls back to `tldr` */
+  tldrPhone?: ReactNode;
 }) {
   const { bg, fg, ring } = TONES[tone];
   return (
@@ -333,11 +485,19 @@ function ExpandCard({
       </button>
 
       <div
-        className={`font-medium leading-tight ${fg}`}
+        className={`font-medium leading-tight ${fg} ${tldrPhone ? "max-[562px]:hidden" : ""}`}
         style={{ marginTop: 6, fontSize: "clamp(12px, 2.5cqw, 14px)", letterSpacing: "-0.05em" }}
       >
         {tldr}
       </div>
+      {tldrPhone && (
+        <div
+          className={`font-medium min-[563px]:hidden ${fg}`}
+          style={{ marginTop: 8, fontSize: 13, lineHeight: 1.45, letterSpacing: "-0.03em" }}
+        >
+          {tldrPhone}
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -518,6 +678,13 @@ export default function CardsSection({ repoCount }: { repoCount: number }) {
               <p>{t("cards.experienceDomain")}</p>
             </>
           }
+          tldrPhone={
+            <>
+              <p>{t("cards.experienceGraduatingShort")}</p>
+              <p>{t("cards.experienceWorkedAtShort")}</p>
+              <p>{t("cards.experienceDomainShort")}</p>
+            </>
+          }
         />
       </div>
 
@@ -591,6 +758,13 @@ export default function CardsSection({ repoCount }: { repoCount: number }) {
               <p>{t("cards.projectsOpenSource")}</p>
             </>
           }
+          tldrPhone={
+            <>
+              <p>{t("cards.projectsReposShort").replace("{count}", String(repoCount))}</p>
+              <p>{t("cards.projectsLeetcodeShort")}</p>
+              <p>{t("cards.projectsOpenSourceShort")}</p>
+            </>
+          }
         />
         <JoinGap active={contactOpen} />
       </div>
@@ -613,6 +787,16 @@ export default function CardsSection({ repoCount }: { repoCount: number }) {
                 <li key={key} className="flex items-center gap-1.5">
                   <Icon size={13} />
                   {label}
+                </li>
+              ))}
+            </ul>
+          }
+          tldrPhone={
+            <ul className="m-0 flex list-none gap-4 p-0" aria-label={t("cards.contactTldr")}>
+              {CONTACTS.map(({ key, label, Icon }) => (
+                <li key={key} className="flex">
+                  <Icon size={20} />
+                  <span className="sr-only">{label}</span>
                 </li>
               ))}
             </ul>
