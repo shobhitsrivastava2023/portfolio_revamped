@@ -10,11 +10,15 @@ import MusicProduction from "./components/MusicProduction";
 import Blogs from "./components/Blogs";
 import Footer from "./components/Footer";
 import { getContributions, getPublicRepoCount } from "./lib/github";
+import DrawerSection from "./components/drawer/DrawerSection";
+import { listPublicDrawerItems } from "./lib/drawer/db";
 
 export default async function Home() {
-  const [repoCount, contributions] = await Promise.all([
+  const [repoCount, contributions, drawerItems] = await Promise.all([
     getPublicRepoCount(),
     getContributions(),
+    // The homepage shouldn't break if the database is unreachable; the section just hides.
+    listPublicDrawerItems(3).catch(() => []),
   ]);
 
   return (
@@ -25,6 +29,7 @@ export default async function Home() {
         <Suspense fallback={null}>
           <CardsSection repoCount={repoCount} />
         </Suspense>
+        <DrawerSection items={drawerItems} />
         <ProofOfWorkSection contributions={contributions} />
         <BeyondCode />
         <ListeningDrinkingSection />

@@ -1,22 +1,9 @@
 import { ImageResponse } from "next/og";
+import { loadOutfit } from "./lib/og";
 
 export const alt = "Shobhit Srivastava, fullstack developer";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-
-/** Outfit as TTF from Google Fonts (no user agent → TTF). Falls back to the default font. */
-async function loadOutfit(weight: number): Promise<ArrayBuffer | null> {
-  try {
-    const css = await (
-      await fetch(`https://fonts.googleapis.com/css2?family=Outfit:wght@${weight}`)
-    ).text();
-    const url = css.match(/src: url\((.+?)\) format\('(?:opentype|truetype)'\)/)?.[1];
-    if (!url) return null;
-    return await (await fetch(url)).arrayBuffer();
-  } catch {
-    return null;
-  }
-}
 
 export default async function OpengraphImage() {
   const outfit = await loadOutfit(500);

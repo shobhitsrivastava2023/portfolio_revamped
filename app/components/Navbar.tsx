@@ -109,6 +109,13 @@ export default function Navbar() {
             {t("nav.blogs")}
           </Link>
           <Link
+            href="/drawer"
+            onClick={() => setOpen(false)}
+            className="flex min-h-[44px] items-center no-underline text-[#FFE7D0] hover:opacity-80 transition-opacity focus:outline-none focus-visible:opacity-80 rounded-[6px] focus-visible:ring-2 focus-visible:ring-[#FFE7D0] focus-visible:ring-offset-2 focus-visible:ring-offset-[#323232]"
+          >
+            {t("nav.drawer")}
+          </Link>
+          <Link
             href="/#philosophy"
             onClick={() => setOpen(false)}
             className="flex min-h-[44px] items-center no-underline text-[#FFE7D0] hover:opacity-80 transition-opacity focus:outline-none focus-visible:opacity-80 rounded-[6px] focus-visible:ring-2 focus-visible:ring-[#FFE7D0] focus-visible:ring-offset-2 focus-visible:ring-offset-[#323232]"

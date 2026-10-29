@@ -15,21 +15,21 @@ import {
 /** Within this many px of the end of the page, the fade clears away so the footer is fully visible. */
 const CLEAR_DISTANCE = 120;
 /** After this long without scrolling, the fade slowly dissolves; any scroll brings it back. */
-const IDLE_MS = 2000;
+const IDLE_MS = 500;
 /** Scroll movement smaller than this (px) doesn't count as activity. */
-const WAKE_THRESHOLD = 4;
+const WAKE_THRESHOLD = 15;
 
 /**
  * Fixed fade at the bottom of the screen. It stretches while you scroll and
  * springs back when you stop, carries a slow drifting warm haze (CSS, see
  * .bottom-fade-haze), clears near the end of the page, and dissolves after a
- * few seconds of not scrolling.
+ * moment of not scrolling. Kept deliberately faint.
  */
 export default function BottomFade() {
   const reduceMotion = useReducedMotion();
   const { scrollY } = useScroll();
   const velocity = useVelocity(scrollY);
-  const stretch = useSpring(useTransform(velocity, [-2500, 0, 2500], [1.6, 1, 1.6]), {
+  const stretch = useSpring(useTransform(velocity, [-2500, 0, 2500], [1.15, 1, 1.15]), {
     stiffness: 120,
     damping: 20,
   });
@@ -88,7 +88,7 @@ export default function BottomFade() {
         className="absolute inset-0 bottom-fade-fill"
         initial={false}
         animate={{ opacity: idle ? 0 : 1 }}
-        transition={idle ? { duration: 1.6, ease: "easeInOut" } : { duration: 0.3, ease: "easeOut" }}
+        transition={idle ? { duration: 0.8, ease: "easeInOut" } : { duration: 0.3, ease: "easeOut" }}
       >
         <div className="bottom-fade-haze" />
       </motion.div>

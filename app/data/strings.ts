@@ -6,6 +6,7 @@ export const STRINGS = {
   // Nav
   "nav.home": "Home",
   "nav.blogs": "Blogs",
+  "nav.drawer": "Drawer",
   "nav.philosophy": "Philosophy",
   "nav.openMenu": "Open menu",
   "nav.closeMenu": "Close menu",
@@ -42,6 +43,16 @@ export const STRINGS = {
   "cards.github": "github",
   "cards.twitter": "twitter",
   "cards.linkedin": "linkedin",
+  // Drawer (personal feed at /drawer)
+  "drawer.title": "drawer",
+  "drawer.intro": "thoughts, photos, clips and songs. unfiltered, newest first.",
+  "drawer.empty": "nothing in the drawer yet.",
+  "drawer.open": "open the drawer",
+  "drawer.pinned": "pinned",
+  "drawer.share": "share",
+  "drawer.copied": "link copied",
+  "drawer.more": "more in the drawer",
+  "drawer.untitled": "untitled",
   // Beyond Code
   "beyondCode.title": "BEYOND CODE",
   // Listening / Drinking
