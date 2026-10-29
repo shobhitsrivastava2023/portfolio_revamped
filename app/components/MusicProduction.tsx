@@ -43,7 +43,7 @@ export default function MusicProduction() {
         </div>
         <div className="flex shrink-0 flex-col w-[200px] max-[562px]:w-full max-[562px]:max-w-[200px]">
           <Image
-            src="/music.jpg"
+            src="/90s%20vibes.jpg"
             alt="Music production"
             width={200}
             height={200}

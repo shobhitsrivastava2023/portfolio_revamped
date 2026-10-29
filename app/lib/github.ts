@@ -1,7 +1,5 @@
 export const GITHUB_USERNAME = "shobhitsrivastava2023";
 
-/** Last known count, used if the GitHub API is down or rate-limited. */
-const FALLBACK_REPO_COUNT = 61;
 
 export type ContributionDay = {
   /** YYYY-MM-DD */
@@ -44,20 +42,5 @@ export async function getContributions(weeks = 26): Promise<ContributionDay[]> {
     return days.filter((d) => d.date >= from);
   } catch {
     return [];
-  }
-}
-
-/** Public repo count from the GitHub API, cached for a day. */
-export async function getPublicRepoCount(): Promise<number> {
-  try {
-    const res = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}`, {
-      headers: { Accept: "application/vnd.github+json" },
-      next: { revalidate: 86400 },
-    });
-    if (!res.ok) return FALLBACK_REPO_COUNT;
-    const json = (await res.json()) as { public_repos?: number };
-    return json.public_repos ?? FALLBACK_REPO_COUNT;
-  } catch {
-    return FALLBACK_REPO_COUNT;
   }
 }

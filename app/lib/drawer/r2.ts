@@ -69,12 +69,17 @@ export async function presignUpload(key: string, mime: string, expiresSeconds = 
   return signed.url;
 }
 
-/** Server-side upload (used for files fetched from Telegram). */
+/**
+ * Server-side upload (used for files fetched from Telegram). Goes through a presigned URL
+ * with the bytes as a plain Uint8Array, like the browser uploads: wrapping the body in a
+ * signed Request (client().fetch) can turn it into a stream that's sent chunked, without
+ * the Content-Length header R2 requires.
+ */
 export async function putObject(key: string, body: ArrayBuffer, mime: string): Promise<void> {
-  const res = await client().fetch(objectUrl(key), {
+  const res = await fetch(await presignUpload(key, mime, 300), {
     method: "PUT",
     headers: { "content-type": mime },
-    body,
+    body: new Uint8Array(body),
   });
   if (!res.ok) throw new Error(`R2 upload failed: ${res.status} ${await res.text()}`);
 }

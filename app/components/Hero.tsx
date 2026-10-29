@@ -53,7 +53,7 @@ export default function Hero() {
       {/* Right column: photo attached to right margin of navbar */}
       <div className="flex w-[281px] max-[562px]:w-full justify-end">
         <Image
-          src="/profile_portfolio.jpeg"
+          src="/music.jpg"
           alt="Shobhit Srivastava"
           width={224}
           height={272}

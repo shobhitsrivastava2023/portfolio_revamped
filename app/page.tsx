@@ -9,16 +9,17 @@ import Philosophy from "./components/Philosophy";
 import MusicProduction from "./components/MusicProduction";
 import Blogs from "./components/Blogs";
 import Footer from "./components/Footer";
-import { getContributions, getPublicRepoCount } from "./lib/github";
+import { getContributions } from "./lib/github";
+import { getLeetCodeStats } from "./lib/leetcode";
 import DrawerSection from "./components/drawer/DrawerSection";
 import { listPublicDrawerItems } from "./lib/drawer/db";
 
 export default async function Home() {
-  const [repoCount, contributions, drawerItems] = await Promise.all([
-    getPublicRepoCount(),
+  const [contributions, drawerItems, leetcode] = await Promise.all([
     getContributions(),
     // The homepage shouldn't break if the database is unreachable; the section just hides.
     listPublicDrawerItems(3).catch(() => []),
+    getLeetCodeStats(),
   ]);
 
   return (
@@ -27,7 +28,7 @@ export default async function Home() {
         <Navbar />
         <Hero />
         <Suspense fallback={null}>
-          <CardsSection repoCount={repoCount} />
+          <CardsSection leetcode={leetcode} />
         </Suspense>
         <DrawerSection items={drawerItems} />
         <ProofOfWorkSection contributions={contributions} />

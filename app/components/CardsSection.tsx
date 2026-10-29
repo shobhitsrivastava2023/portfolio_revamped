@@ -8,6 +8,7 @@ import { PROJECTS } from "../data/projects";
 import ProjectCover from "./ProjectCover";
 import { EXPERIENCES } from "../data/experience";
 import { t } from "../data/strings";
+import { LEETCODE_URL, LEETCODE_USERNAME, type LeetCodeStats } from "../lib/leetcode";
 
 function ChevronDown({ className, rotate }: { className?: string; rotate?: boolean }) {
   return (
@@ -108,6 +109,14 @@ function LinkedinIcon({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
       <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 1 1 0-4.125 2.062 2.062 0 0 1 0 4.125zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+    </svg>
+  );
+}
+
+function LeetCodeIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M13.483 0a1.374 1.374 0 0 0-.961.438L7.116 6.226l-3.854 4.126a5.266 5.266 0 0 0-1.209 2.104 5.35 5.35 0 0 0-.125.513 5.527 5.527 0 0 0 .062 2.362 5.83 5.83 0 0 0 .349 1.017 5.938 5.938 0 0 0 1.271 1.818l4.277 4.193.039.038c2.248 2.165 5.852 2.133 8.063-.074l2.396-2.392c.54-.54.54-1.414.003-1.955a1.378 1.378 0 0 0-1.951-.003l-2.396 2.392a3.021 3.021 0 0 1-4.205.038l-.02-.019-4.276-4.193c-.652-.64-.972-1.469-.948-2.263a2.68 2.68 0 0 1 .066-.523 2.545 2.545 0 0 1 .619-1.164L9.13 8.114c1.058-1.134 3.204-1.27 4.43-.278l3.501 2.831c.593.48 1.461.387 1.94-.207a1.384 1.384 0 0 0-.207-1.943l-3.5-2.831c-.8-.647-1.766-1.045-2.774-1.202l2.015-2.158A1.384 1.384 0 0 0 13.483 0zm-2.866 12.815a1.38 1.38 0 0 0-1.38 1.382 1.38 1.38 0 0 0 1.38 1.382H20.79a1.38 1.38 0 0 0 1.38-1.382 1.38 1.38 0 0 0-1.38-1.382z" />
     </svg>
   );
 }
@@ -423,10 +432,86 @@ function ContactLinks() {
   );
 }
 
+/** Bar colour per difficulty, in the site palette. */
+const DIFFICULTY_COLOR = { Easy: "#FFE7D0", Medium: "#FC6E20", Hard: "#E2590F" } as const;
+
+/** Competitive profile panel: LeetCode link, headline numbers, and solved-by-difficulty bars. */
+function CompetitiveStats({ stats }: { stats: LeetCodeStats | null }) {
+  const numbers = stats
+    ? [
+        { value: stats.rating ?? "-", label: t("competitive.rating") },
+        { value: stats.topPercentage != null ? `top ${stats.topPercentage}%` : "-", label: t("competitive.ofContestants") },
+        { value: stats.solved, label: t("competitive.solved") },
+        { value: stats.contests, label: t("competitive.contests") },
+      ]
+    : [];
+  return (
+    <motion.div className="flex flex-col gap-4 text-[#FFE7D0]" initial="hidden" animate="shown" variants={LIST_VARIANTS}>
+      <motion.a
+        variants={ITEM_VARIANTS}
+        href={LEETCODE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group flex items-center gap-3 rounded-[8px] p-3 no-underline text-[#FFE7D0] transition-colors bg-[#FFE7D0]/8 hover:bg-[#FFE7D0]/14 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFE7D0] focus-visible:ring-offset-2 focus-visible:ring-offset-[#323232]"
+      >
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-[8px] bg-[#FFE7D0] text-[#323232]">
+          <LeetCodeIcon size={20} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-outfit font-medium" style={{ fontSize: 18, letterSpacing: "-0.05em" }}>
+            leetcode
+          </span>
+          <span className="block truncate opacity-70" style={{ fontSize: 11, letterSpacing: "normal" }}>
+            @{LEETCODE_USERNAME}
+            {stats?.globalRanking ? ` · global rank ${stats.globalRanking.toLocaleString("en-IN")}` : ""}
+          </span>
+        </span>
+        <ExternalLinkIcon className="shrink-0" />
+      </motion.a>
+
+      {stats && (
+        <>
+          <motion.ul variants={ITEM_VARIANTS} className="m-0 grid list-none grid-cols-4 gap-3 p-0 max-[480px]:grid-cols-2">
+            {numbers.map((n) => (
+              <li key={n.label} className="rounded-[8px] bg-[#FFE7D0]/8 p-3">
+                <p className="font-outfit font-medium" style={{ fontSize: "clamp(20px, 5cqw, 28px)", letterSpacing: "-0.06em", lineHeight: 1 }}>
+                  {n.value}
+                </p>
+                <p className="mt-1 opacity-70" style={{ fontSize: 11, letterSpacing: "normal" }}>
+                  {n.label}
+                </p>
+              </li>
+            ))}
+          </motion.ul>
+
+          <motion.ul variants={ITEM_VARIANTS} className="m-0 flex list-none flex-col gap-2.5 p-0">
+            {stats.byDifficulty.map((d) => (
+              <li key={d.difficulty} className="grid grid-cols-[64px_1fr_auto] items-center gap-3" style={{ fontSize: 12 }}>
+                <span className="font-outfit font-medium">{d.difficulty.toLowerCase()}</span>
+                <span className="h-2 overflow-hidden rounded-full bg-[#FFE7D0]/15">
+                  <span
+                    className="block h-full rounded-full"
+                    style={{ width: `${d.total ? Math.max(2, (d.solved / d.total) * 100) : 0}%`, backgroundColor: DIFFICULTY_COLOR[d.difficulty] }}
+                  />
+                </span>
+                <span className="font-outfit opacity-80 tabular-nums">
+                  {d.solved}
+                  <span className="opacity-60">/{d.total}</span>
+                </span>
+              </li>
+            ))}
+          </motion.ul>
+        </>
+      )}
+    </motion.div>
+  );
+}
+
 /**
  * An accordion card. It never moves: its contents open in a full-width
  * ExpandPanel underneath, and the card squares off its bottom corners to join
- * it. Cards fill their row so neighbours always end on the same line.
+ * it. Cards are as tall as their content, but fill their row so neighbours
+ * always end on the same line; the title stays centred when stretched.
  */
 function ExpandCard({
   id,
@@ -438,8 +523,10 @@ function ExpandCard({
   tone,
   widthClass,
   marginTop,
-  tldr,
-  tldrPhone,
+  fillRow = true,
+  growWhenOpen = false,
+  openSummary,
+  layoutId,
 }: {
   id: string;
   panelId: string;
@@ -451,24 +538,36 @@ function ExpandCard({
   tone: Tone;
   widthClass: string;
   marginTop: number;
-  tldr: ReactNode;
-  /** Shorter tl;dr for phones; falls back to `tldr` */
-  tldrPhone?: ReactNode;
+  /** Stretch to the row's height (default). Off for cards stacked in a column that keep their own height. */
+  fillRow?: boolean;
+  /** Keep its place and grow downward to meet its panel when opened (title stays at the top). */
+  growWhenOpen?: boolean;
+  /** Shown under the title while open, filling the space a growing card gains. */
+  openSummary?: ReactNode;
+  /** Lets the same card move smoothly between slots (Projects moves below Experience's panel). */
+  layoutId?: string;
 }) {
   const { bg, fg, ring } = TONES[tone];
+  const growing = growWhenOpen && open;
+  // Cards that change size or slot animate it; the title only moves, so it isn't stretched mid-animation.
+  const animatesLayout = growWhenOpen || Boolean(layoutId);
   return (
     <motion.div
       id={id}
-      className={`${widthClass} max-[562px]:w-full flex-1 overflow-hidden p-4 max-[562px]:p-3`}
-      style={{ minHeight: 168, marginTop, backgroundColor: bg, borderTopLeftRadius: 10, borderTopRightRadius: 10 }}
+      layout={animatesLayout}
+      layoutId={layoutId}
+      className={`${widthClass} max-[562px]:w-full flex flex-col overflow-hidden p-4 max-[562px]:p-3 ${growing ? "justify-start" : "justify-center"} ${fillRow || growing ? "flex-1" : ""}`}
+      style={{ marginTop, backgroundColor: bg, borderTopLeftRadius: 10, borderTopRightRadius: 10 }}
       initial={false}
       animate={{
         borderBottomLeftRadius: open ? 0 : 10,
         borderBottomRightRadius: open ? 0 : 10,
       }}
-      transition={{ duration: 0.2, ease: EASE }}
+      transition={{ duration: 0.2, ease: EASE, layout: { duration: 0.35, ease: EASE } }}
     >
-      <button
+      <motion.button
+        layout={animatesLayout ? "position" : undefined}
+        transition={{ layout: { duration: 0.35, ease: EASE } }}
         type="button"
         onClick={onToggle}
         aria-expanded={open}
@@ -482,22 +581,21 @@ function ExpandCard({
           {title}
         </span>
         <ChevronDown className={fg} rotate={open} />
-      </button>
-
-      <div
-        className={`font-medium leading-tight ${fg} ${tldrPhone ? "max-[562px]:hidden" : ""}`}
-        style={{ marginTop: 6, fontSize: "clamp(12px, 2.5cqw, 14px)", letterSpacing: "-0.05em" }}
-      >
-        {tldr}
-      </div>
-      {tldrPhone && (
-        <div
-          className={`font-medium min-[563px]:hidden ${fg}`}
-          style={{ marginTop: 8, fontSize: 13, lineHeight: 1.45, letterSpacing: "-0.03em" }}
-        >
-          {tldrPhone}
-        </div>
-      )}
+      </motion.button>
+      <AnimatePresence initial={false}>
+        {open && openSummary && (
+          <motion.div
+            key="summary"
+            className={`font-medium leading-snug ${fg}`}
+            style={{ marginTop: 10, fontSize: "clamp(12px, 2.6cqw, 15px)", letterSpacing: "-0.04em" }}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0, transition: { delay: 0.15, duration: 0.3, ease: EASE } }}
+            exit={{ opacity: 0, transition: { duration: 0.1 } }}
+          >
+            {openSummary}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
@@ -516,7 +614,8 @@ function ExpandPanel({
 }: {
   id: string;
   open: boolean;
-  side: "left" | "right";
+  /** Column of the card it joins, or "full" for a full-width card (plain drop-down, no L). */
+  side: "left" | "right" | "full";
   tone: Tone;
   children: ReactNode;
 }) {
@@ -529,7 +628,7 @@ function ExpandPanel({
   return (
     <div className="relative col-span-2">
       <AnimatePresence initial={false}>
-        {open && (
+        {open && side !== "full" && (
           <motion.div
             key="fillet"
             aria-hidden
@@ -551,7 +650,7 @@ function ExpandPanel({
             className="overflow-hidden"
             style={{
               backgroundColor: bg,
-              borderRadius: side === "left" ? "0 10px 10px 10px" : "10px 0 10px 10px",
+              borderRadius: side === "left" ? "0 10px 10px 10px" : side === "right" ? "10px 0 10px 10px" : "0 0 10px 10px",
             }}
           >
             <div id={id} className="p-4 max-[562px]:p-3">
@@ -581,19 +680,20 @@ function JoinGap({ active }: { active: boolean }) {
   );
 }
 
-export default function CardsSection({ repoCount }: { repoCount: number }) {
+export default function CardsSection({ leetcode }: { leetcode: LeetCodeStats | null }) {
   const searchParams = useSearchParams();
   const [experienceOpen, setExperienceOpen] = useState(false);
   const [projectsOpen, setProjectsOpen] = useState(false);
+  const [competitiveOpen, setCompetitiveOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
 
-  // Projects and Contact share the panel row under them, so only one of them is open at a time.
-  const toggleProjects = () => {
-    if (!projectsOpen) setContactOpen(false);
-    setProjectsOpen(!projectsOpen);
+  // Competitive profile and Contact share the panel row under them, so only one of them is open at a time.
+  const toggleCompetitive = () => {
+    if (!competitiveOpen) setContactOpen(false);
+    setCompetitiveOpen(!competitiveOpen);
   };
   const toggleContact = () => {
-    if (!contactOpen) setProjectsOpen(false);
+    if (!contactOpen) setCompetitiveOpen(false);
     setContactOpen(!contactOpen);
   };
 
@@ -618,6 +718,24 @@ export default function CardsSection({ repoCount }: { repoCount: number }) {
     }
   }, [searchParams]);
 
+  // Projects sits under Experience in the first column. When Experience opens, its panel needs the
+  // space right below it, so Projects moves down under that panel (same card, animated via layoutId).
+  const projectsCard = (stacked: boolean) => (
+    <ExpandCard
+      id="section-projects"
+      panelId="projects-panel"
+      open={projectsOpen}
+      onToggle={() => setProjectsOpen(!projectsOpen)}
+      title={t("cards.projects")}
+      titleSize="clamp(32px, 11.39cqw, 64px)"
+      tone="orange"
+      widthClass={stacked ? "w-[271px]" : "w-full"}
+      marginTop={stacked ? 0 : 20}
+      fillRow={!stacked}
+      layoutId="projects-card"
+    />
+  );
+
   return (
     // Two columns at every width: fixed 281px columns on desktop, equal halves with a 12px gap on phones.
     // Text sizes use cqw (this section is the container) so phones get the desktop layout, scaled.
@@ -625,7 +743,7 @@ export default function CardsSection({ repoCount }: { repoCount: number }) {
       className="@container grid w-full max-w-[562px] grid-cols-[281px_281px] gap-0 max-[562px]:grid-cols-2 max-[562px]:gap-x-3 [--left-card:calc(50%-6px)] [--right-card:calc(50%-6px)] min-[563px]:[--left-card:271px] min-[563px]:[--right-card:224px]"
       style={{ marginTop: 40 }}
     >
-      {/* Row 1, left: resume + Experience, aligned to navbar left */}
+      {/* Row 1, left: resume, Experience, Projects, aligned to navbar left */}
       <div className="flex w-[281px] max-[562px]:w-full flex-col">
         <motion.div
           className="relative mr-auto max-w-[271px] overflow-hidden max-[562px]:max-w-none"
@@ -661,6 +779,7 @@ export default function CardsSection({ repoCount }: { repoCount: number }) {
             <DownloadIcon />
           </a>
         </motion.div>
+        <div aria-hidden style={{ minHeight: 35 }} />
         <ExpandCard
           id="section-experience"
           panelId="experience-panel"
@@ -670,8 +789,10 @@ export default function CardsSection({ repoCount }: { repoCount: number }) {
           titleSize="clamp(24px, 8.54cqw, 48px)"
           tone="dark"
           widthClass="w-[271px]"
-          marginTop={35}
-          tldr={
+          marginTop={0}
+          fillRow={false}
+          growWhenOpen
+          openSummary={
             <>
               <p>{t("cards.experienceAi")}</p>
               <p>{t("cards.experienceFullStack")}</p>
@@ -679,16 +800,21 @@ export default function CardsSection({ repoCount }: { repoCount: number }) {
             </>
           }
         />
+        {/* Experience never moves. Spare space in this row sits between it and Projects, so Projects'
+            bottom lines up with the status card; when Experience opens it grows down to its panel instead. */}
+        {!experienceOpen && (
+          <>
+            <div aria-hidden className="flex-1" style={{ minHeight: 20 }} />
+            {projectsCard(true)}
+          </>
+        )}
       </div>
 
       {/* Row 1, right: status, aligned to navbar right */}
       <div className="flex w-[281px] max-[562px]:w-full flex-col items-end">
         <div
           className="relative flex w-[224px] max-[562px]:w-full flex-1 flex-col justify-between overflow-hidden border-2 border-[#323232] bg-[#FFE7D0] p-4 max-[562px]:p-3 font-bold leading-tight text-[#323232]"
-          style={{
-            minHeight: 250,
-            letterSpacing: "-0.05em",
-          }}
+          style={{ letterSpacing: "-0.05em" }}
         >
           <div className="min-h-0 min-w-0" style={{ marginTop: 36 }}>
             <p
@@ -725,39 +851,41 @@ export default function CardsSection({ repoCount }: { repoCount: number }) {
             <ExternalLinkIcon />
           </a>
         </div>
-        <JoinGap active={experienceOpen} />
+        <JoinGap active={experienceOpen || projectsOpen} />
       </div>
 
       <ExpandPanel id="experience-panel" open={experienceOpen} side="left" tone="dark">
         <ExperienceTimeline />
       </ExpandPanel>
 
-      {/* Row 2, left: Projects */}
+      {/* Projects' panel while Projects is still under Experience */}
+      <ExpandPanel id="projects-panel" open={projectsOpen && !experienceOpen} side="left" tone="orange">
+        <ProjectTiles />
+      </ExpandPanel>
+
+      {/* Experience open: Projects moves below its panel, full width, opening as a plain drop-down */}
+      {experienceOpen && (
+        <>
+          <div className="col-span-2 flex flex-col">{projectsCard(false)}</div>
+          <ExpandPanel id="projects-panel" open={projectsOpen} side="full" tone="orange">
+            <ProjectTiles />
+          </ExpandPanel>
+        </>
+      )}
+
+      {/* Row 2, left: Competitive profile */}
       <div className="flex w-[281px] max-[562px]:w-full flex-col">
         <ExpandCard
-          id="section-projects"
-          panelId="projects-panel"
-          open={projectsOpen}
-          onToggle={toggleProjects}
-          title={t("cards.projects")}
-          titleSize="clamp(32px, 11.39cqw, 64px)"
-          tone="orange"
+          id="section-competitive"
+          panelId="competitive-panel"
+          open={competitiveOpen}
+          onToggle={toggleCompetitive}
+          title={t("cards.competitive")}
+          // Long title: 48px on desktop, but shrinks faster than the others on phones (~21px).
+          titleSize="clamp(21px, calc(14.3cqw - 32px), 48px)"
+          tone="dark"
           widthClass="w-[271px]"
           marginTop={20}
-          tldr={
-            <>
-              <p>{t("cards.projectsRepos").replace("{count}", String(repoCount))}</p>
-              <p>{t("cards.projectsLeetcode")}</p>
-              <p>{t("cards.projectsOpenSource")}</p>
-            </>
-          }
-          tldrPhone={
-            <>
-              <p>{t("cards.projectsReposShort").replace("{count}", String(repoCount))}</p>
-              <p>{t("cards.projectsLeetcodeShort")}</p>
-              <p>{t("cards.projectsOpenSourceShort")}</p>
-            </>
-          }
         />
         <JoinGap active={contactOpen} />
       </div>
@@ -774,32 +902,12 @@ export default function CardsSection({ repoCount }: { repoCount: number }) {
           tone="dark"
           widthClass="w-[224px]"
           marginTop={20}
-          tldr={
-            <ul className="m-0 grid w-fit list-none grid-cols-2 gap-x-5 max-[562px]:gap-x-3 gap-y-1.5 p-0" aria-label={t("cards.contactTldr")}>
-              {CONTACTS.map(({ key, label, Icon }) => (
-                <li key={key} className="flex items-center gap-1.5">
-                  <Icon size={13} />
-                  {label}
-                </li>
-              ))}
-            </ul>
-          }
-          tldrPhone={
-            <ul className="m-0 flex list-none gap-4 p-0" aria-label={t("cards.contactTldr")}>
-              {CONTACTS.map(({ key, label, Icon }) => (
-                <li key={key} className="flex">
-                  <Icon size={20} />
-                  <span className="sr-only">{label}</span>
-                </li>
-              ))}
-            </ul>
-          }
         />
-        <JoinGap active={projectsOpen} />
+        <JoinGap active={competitiveOpen} />
       </div>
 
-      <ExpandPanel id="projects-panel" open={projectsOpen} side="left" tone="orange">
-        <ProjectTiles />
+      <ExpandPanel id="competitive-panel" open={competitiveOpen} side="left" tone="dark">
+        <CompetitiveStats stats={leetcode} />
       </ExpandPanel>
       <ExpandPanel id="contact-panel" open={contactOpen} side="right" tone="dark">
         <ContactLinks />
