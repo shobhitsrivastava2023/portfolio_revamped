@@ -64,4 +64,4 @@ The static site runs without any env vars. The live sections need:
 | `R2_PUBLIC_URL` | Public URL of the R2 bucket (r2.dev or custom domain) |
 | `DRAWER_ADMIN_PASSWORD` | Login for `/drawer/admin` |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `TELEGRAM_OWNER_ID` | Posting to the drawer from Telegram |
-| `NEXT_PUBLIC_SITE_URL` | Optional override for the canonical URL (defaults to https://shobhitsrivastava.com) |
+| `NEXT_PUBLIC_SITE_URL` | Optional override for the canonical URL (defaults to https://www.shobhitsrivastava.com) |
