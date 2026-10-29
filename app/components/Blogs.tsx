@@ -4,11 +4,10 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { BLOGS } from "../data/blogs";
-import { useLanguage } from "../context/LanguageContext";
+import { t } from "../data/strings";
 
 export default function Blogs() {
   const searchParams = useSearchParams();
-  const { t } = useLanguage();
 
   useEffect(() => {
     if (searchParams.get("section") === "blogs") {

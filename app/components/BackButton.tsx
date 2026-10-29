@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useLanguage } from "../context/LanguageContext";
+import { t } from "../data/strings";
 
 /** Back button 71×50. Defaults to home; pass href to override (e.g. /blog). */
 export default function BackButton({ href = "/" }: { href?: string }) {
-  const { t } = useLanguage();
   return (
     <Link
       href={href}

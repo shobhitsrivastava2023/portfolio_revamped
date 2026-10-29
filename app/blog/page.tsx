@@ -3,10 +3,9 @@
 import Link from "next/link";
 import Navbar from "../components/Navbar";
 import { BLOGS } from "../data/blogs";
-import { useLanguage } from "../context/LanguageContext";
+import { t } from "../data/strings";
 
 export default function BlogListPage() {
-  const { t } = useLanguage();
   return (
     <div className="flex min-h-screen flex-col items-center bg-[#FFE7D0] font-sans">
       <main className="flex w-full max-w-[562px] flex-col items-center px-4">

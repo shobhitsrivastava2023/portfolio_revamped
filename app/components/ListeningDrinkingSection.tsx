@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useLanguage } from "../context/LanguageContext";
+import { t } from "../data/strings";
 
 type NowPlaying =
   | { isPlaying: true; track: string; artists: string; albumArtUrl: string | null; trackUrl: string | null }
@@ -106,7 +106,6 @@ const ROW_MIN_HEIGHT = 44; // Min 44px for touch targets
 const MAX_TRACK_LABEL_LENGTH = 40;
 
 export default function ListeningDrinkingSection() {
-  const { t } = useLanguage();
   const nowPlaying = useNowPlaying();
 
   let trackLabel: string;

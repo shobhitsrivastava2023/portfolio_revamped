@@ -44,8 +44,20 @@ body {
   outline-offset: 2px;
 }
 
+/* Page transitions (project cover morphs into the project page) */
+::view-transition-group(*) {
+  animation-duration: 0.4s;
+  animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+
   *,
   *::before,
   *::after {
@@ -59,13 +71,3 @@ body {
   font-family: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
 }
 
-@keyframes meteor {
-  0% {
-    transform: translate(0, 0) rotate(-25deg);
-    opacity: 0.85;
-  }
-  100% {
-    transform: translate(-320px, 149px) rotate(-25deg);
-    opacity: 0;
-  }
-}

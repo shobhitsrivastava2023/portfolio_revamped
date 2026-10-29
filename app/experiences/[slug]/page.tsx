@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import BackButton from "../../components/BackButton";
@@ -5,6 +6,17 @@ import { getExperienceBySlug, EXPERIENCES } from "../../data/experience";
 
 export function generateStaticParams() {
   return EXPERIENCES.map((e) => ({ slug: e.slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const experience = getExperienceBySlug((await params).slug);
+  if (!experience) return {};
+  const title = `${experience.role} at ${experience.company}`;
+  return { title, description: experience.description };
 }
 
 export default async function ExperiencePage({

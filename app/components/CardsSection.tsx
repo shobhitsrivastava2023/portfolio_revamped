@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
+import { useState, useEffect, ViewTransition, type ReactNode } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { PROJECTS } from "../data/projects";
+import ProjectCover from "./ProjectCover";
 import { EXPERIENCES } from "../data/experience";
-import { useLanguage } from "../context/LanguageContext";
-import type { Locale } from "../data/translations";
+import { t } from "../data/strings";
 
 function ChevronDown({ className, rotate }: { className?: string; rotate?: boolean }) {
   return (
@@ -78,14 +77,365 @@ function DownloadIcon({ className }: { className?: string }) {
   );
 }
 
-export default function CardsSection() {
+/* Contact method icons (24×24, drawn in currentColor) */
+
+function MailIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" strokeWidth="2" />
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function GithubIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+    </svg>
+  );
+}
+
+function XIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
+    </svg>
+  );
+}
+
+function LinkedinIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 1 1 0-4.125 2.062 2.062 0 0 1 0 4.125zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+    </svg>
+  );
+}
+
+const CONTACTS = [
+  { key: "gmail", label: t("cards.gmail"), handle: "shobhitsrivastava729@gmail.com", href: "mailto:shobhitsrivastava729@gmail.com", Icon: MailIcon },
+  { key: "github", label: t("cards.github"), handle: "@shobhitsrivastava2023", href: "https://github.com/shobhitsrivastava2023", Icon: GithubIcon },
+  { key: "twitter", label: t("cards.twitter"), handle: "@Shobhit_Talks", href: "https://x.com/Shobhit_Talks", Icon: XIcon },
+  { key: "linkedin", label: t("cards.linkedin"), handle: "in/shobhit-srivastava-s1323", href: "https://www.linkedin.com/in/shobhit-srivastava-s1323/", Icon: LinkedinIcon },
+];
+
+const EASE = [0.25, 0.1, 0.25, 1] as const;
+const TONES = {
+  dark: {
+    bg: "#323232",
+    fg: "text-[#FFE7D0]",
+    ring: "focus-visible:ring-[#FFE7D0] focus-visible:ring-offset-[#323232]",
+  },
+  orange: {
+    bg: "#FC6E20",
+    fg: "text-[#323232]",
+    ring: "focus-visible:ring-[#323232] focus-visible:ring-offset-[#FC6E20]",
+  },
+};
+type Tone = keyof typeof TONES;
+
+/** Staggered fade-up for the items inside an open card or panel. */
+const LIST_VARIANTS = {
+  hidden: {},
+  shown: { transition: { delayChildren: 0.12, staggerChildren: 0.06 } },
+};
+const ITEM_VARIANTS = {
+  hidden: { opacity: 0, y: 14 },
+  shown: { opacity: 1, y: 0, transition: { duration: 0.35, ease: EASE } },
+};
+
+/** The 2x2 grid of project tiles shown when the Projects card is open. */
+function ProjectTiles() {
+  return (
+    <motion.ul
+      className="m-0 grid list-none grid-cols-2 gap-4 p-0 max-[480px]:grid-cols-1"
+      initial="hidden"
+      animate="shown"
+      variants={LIST_VARIANTS}
+    >
+      {PROJECTS.map((project) => (
+        <motion.li key={project.slug} variants={ITEM_VARIANTS} whileHover={{ y: -4 }}>
+          <Link
+            href={`/projects/${project.slug}?from=projects`}
+            className="group block rounded-[10px] no-underline text-[#323232] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#323232] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FC6E20]"
+          >
+            <ViewTransition name={`project-cover-${project.slug}`}>
+              <div className="relative aspect-16/10 w-full overflow-hidden rounded-[8px] shadow-[0_0_0_1px_rgba(50,50,50,0.15)] transition-shadow group-hover:shadow-[0_8px_20px_-8px_rgba(50,50,50,0.6)]">
+                <ProjectCover
+                  project={project}
+                  size="card"
+                  sizes="(max-width: 480px) 100vw, (max-width: 562px) 50vw, 265px"
+                />
+              </div>
+            </ViewTransition>
+            <p
+              className="mt-3 flex items-center gap-1 font-outfit font-medium"
+              style={{ fontSize: 20, letterSpacing: "-0.06em", lineHeight: 1.1 }}
+            >
+              {project.name}
+              <ExternalLinkIcon className="opacity-0 transition-opacity group-hover:opacity-100" />
+            </p>
+            <p className="mt-1 leading-snug" style={{ fontSize: 12, letterSpacing: "-0.02em" }}>
+              {project.tagline}
+            </p>
+            <p className="mt-1 opacity-75" style={{ fontSize: 10, letterSpacing: "normal" }}>
+              {project.stack}
+            </p>
+          </Link>
+        </motion.li>
+      ))}
+    </motion.ul>
+  );
+}
+
+/** Timeline of roles shown when the Experience card is open. */
+function ExperienceTimeline() {
+  return (
+    <motion.ol className="m-0 list-none p-0" initial="hidden" animate="shown" variants={LIST_VARIANTS}>
+      {EXPERIENCES.map((entry, i) => {
+        const last = i === EXPERIENCES.length - 1;
+        return (
+          <motion.li key={entry.slug} className="flex items-stretch" style={{ gap: 14 }} variants={ITEM_VARIANTS}>
+            {/* Dot + connecting line */}
+            <div className="flex shrink-0 flex-col items-center" style={{ width: 10, paddingTop: 9 }} aria-hidden>
+              <div className="rounded-full bg-[#FC6E20]" style={{ width: 9, height: 9 }} />
+              {!last && <div className="w-px flex-1 bg-[#FFE7D0]/40" style={{ marginTop: 4 }} />}
+            </div>
+            <Link
+              href={`/experiences/${entry.slug}?from=experience`}
+              className="group min-w-0 flex-1 rounded-[6px] no-underline text-[#FFE7D0] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFE7D0] focus-visible:ring-offset-2 focus-visible:ring-offset-[#323232]"
+              style={{ paddingBottom: last ? 0 : 22 }}
+            >
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+                <p className="flex items-baseline gap-2 font-outfit font-medium">
+                  <span style={{ fontSize: 24, letterSpacing: "-0.06em" }}>{entry.company}</span>
+                  <span className="flex items-center gap-1 opacity-85" style={{ fontSize: 14, letterSpacing: "-0.04em" }}>
+                    {entry.role}
+                    <ExternalLinkIcon className="opacity-0 transition-opacity group-hover:opacity-100" />
+                  </span>
+                </p>
+                <p className="font-outfit opacity-70" style={{ fontSize: 12, letterSpacing: "-0.02em" }}>
+                  {entry.duration}
+                </p>
+              </div>
+              <p className="mt-1 leading-snug opacity-90 transition-opacity group-hover:opacity-100" style={{ fontSize: 13, letterSpacing: "normal" }}>
+                {entry.description}
+              </p>
+            </Link>
+          </motion.li>
+        );
+      })}
+    </motion.ol>
+  );
+}
+
+/** Link tiles shown when the Contact card is open. */
+function ContactLinks() {
+  return (
+    <motion.ul
+      className="m-0 grid list-none grid-cols-2 gap-3 p-0 max-[480px]:grid-cols-1"
+      initial="hidden"
+      animate="shown"
+      variants={LIST_VARIANTS}
+    >
+      {CONTACTS.map(({ key, label, handle, href, Icon }) => {
+        const external = href.startsWith("http");
+        return (
+          <motion.li key={key} variants={ITEM_VARIANTS} whileHover={{ y: -3 }}>
+            <a
+              href={href}
+              {...(external && { target: "_blank", rel: "noopener noreferrer" })}
+              className="group flex items-center gap-3 rounded-[8px] p-3 no-underline text-[#FFE7D0] transition-colors bg-[#FFE7D0]/8 hover:bg-[#FFE7D0]/14 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFE7D0] focus-visible:ring-offset-2 focus-visible:ring-offset-[#323232]"
+            >
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-[8px] bg-[#FFE7D0] text-[#323232]">
+                <Icon size={20} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center gap-1 font-outfit font-medium" style={{ fontSize: 18, letterSpacing: "-0.05em" }}>
+                  {label}
+                  <ExternalLinkIcon className="opacity-0 transition-opacity group-hover:opacity-100" />
+                </span>
+                <span className="block truncate opacity-70" style={{ fontSize: 11, letterSpacing: "normal" }}>
+                  {handle}
+                </span>
+              </span>
+            </a>
+          </motion.li>
+        );
+      })}
+    </motion.ul>
+  );
+}
+
+const EXPAND = {
+  initial: { height: 0, opacity: 0 },
+  animate: { height: "auto", opacity: 1 },
+  exit: { height: 0, opacity: 0 },
+  transition: { duration: 0.35, ease: EASE },
+};
+
+/**
+ * An accordion card. It never moves: its contents open in a full-width
+ * ExpandPanel underneath, and the card squares off its bottom corners to join
+ * it. Cards fill their row so neighbours always end on the same line.
+ */
+function ExpandCard({
+  id,
+  panelId,
+  open,
+  onToggle,
+  title,
+  titleSize,
+  tone,
+  widthClass,
+  marginTop,
+  tldr,
+}: {
+  id: string;
+  panelId: string;
+  open: boolean;
+  onToggle: () => void;
+  title: string;
+  /** CSS font-size; use cqw so it scales with the section on phones */
+  titleSize: string;
+  tone: Tone;
+  widthClass: string;
+  marginTop: number;
+  tldr: ReactNode;
+}) {
+  const { bg, fg, ring } = TONES[tone];
+  return (
+    <motion.div
+      id={id}
+      className={`${widthClass} max-[562px]:w-full flex-1 overflow-hidden p-4 max-[562px]:p-3`}
+      style={{ minHeight: 168, marginTop, backgroundColor: bg, borderTopLeftRadius: 10, borderTopRightRadius: 10 }}
+      initial={false}
+      animate={{
+        borderBottomLeftRadius: open ? 0 : 10,
+        borderBottomRightRadius: open ? 0 : 10,
+      }}
+      transition={{ duration: 0.2, ease: EASE }}
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        aria-controls={panelId}
+        className={`grid w-full min-h-[44px] grid-cols-[1fr_auto] items-center gap-3 border-0 bg-transparent p-0 text-left cursor-pointer touch-manipulation rounded-[6px] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${ring}`}
+      >
+        <span
+          className={`min-w-0 overflow-hidden font-outfit font-normal leading-none ${fg}`}
+          style={{ fontSize: titleSize, letterSpacing: "-0.11em" }}
+        >
+          {title}
+        </span>
+        <ChevronDown className={fg} rotate={open} />
+      </button>
+
+      <div
+        className={`font-medium leading-tight ${fg}`}
+        style={{ marginTop: 6, fontSize: "clamp(12px, 2.5cqw, 14px)", letterSpacing: "-0.05em" }}
+      >
+        {tldr}
+      </div>
+    </motion.div>
+  );
+}
+
+/**
+ * Full-width panel under a row of cards. With the squared-off
+ * card it forms one L-shaped block; the fillet rounds the inside corner where
+ * the card meets the panel. `side` is the column the card sits in.
+ */
+function ExpandPanel({
+  id,
+  open,
+  side,
+  tone,
+  children,
+}: {
+  id: string;
+  open: boolean;
+  side: "left" | "right";
+  tone: Tone;
+  children: ReactNode;
+}) {
+  const { bg } = TONES[tone];
+  // --left-card / --right-card are the card widths, set on the section for each breakpoint.
+  const fillet =
+    side === "left"
+      ? { left: "var(--left-card)", background: `radial-gradient(circle at 100% 0, transparent 10px, ${bg} 10.5px)` }
+      : { right: "var(--right-card)", background: `radial-gradient(circle at 0 0, transparent 10px, ${bg} 10.5px)` };
+  return (
+    <div className="relative col-span-2">
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="fillet"
+            aria-hidden
+            className="absolute"
+            style={{ top: -10, width: 10, height: 10, ...fillet }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          />
+        )}
+        {open && (
+          <motion.div
+            key="panel"
+            initial={{ height: 0 }}
+            animate={{ height: "auto" }}
+            exit={{ height: 0 }}
+            transition={EXPAND.transition}
+            className="overflow-hidden"
+            style={{
+              backgroundColor: bg,
+              borderRadius: side === "left" ? "0 10px 10px 10px" : "10px 0 10px 10px",
+            }}
+          >
+            <div id={id} className="p-4 max-[562px]:p-3">
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/**
+ * When the card on the other side of a row is joined to its panel,
+ * this keeps a 20px gap between this side's card and the panel (the joined
+ * card stretches to fill the same space).
+ */
+function JoinGap({ active }: { active: boolean }) {
+  return (
+    <motion.div
+      aria-hidden
+      className="shrink-0"
+      initial={false}
+      animate={{ height: active ? 20 : 0 }}
+      transition={{ duration: 0.35, ease: EASE }}
+    />
+  );
+}
+
+export default function CardsSection({ repoCount }: { repoCount: number }) {
   const searchParams = useSearchParams();
   const [experienceOpen, setExperienceOpen] = useState(false);
   const [projectsOpen, setProjectsOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
-  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
-  const langDropdownRef = useRef<HTMLDivElement>(null);
-  const { locale, setLocale, t, localeLabel, locales } = useLanguage();
+
+  // Projects and Contact share the panel row under them, so only one of them is open at a time.
+  const toggleProjects = () => {
+    if (!projectsOpen) setContactOpen(false);
+    setProjectsOpen(!projectsOpen);
+  };
+  const toggleContact = () => {
+    if (!contactOpen) setProjectsOpen(false);
+    setContactOpen(!contactOpen);
+  };
 
   // Restore accordion state and scroll when returning from detail page (e.g. Back with ?section=experience)
   useEffect(() => {
@@ -108,22 +458,14 @@ export default function CardsSection() {
     }
   }, [searchParams]);
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (langDropdownRef.current && !langDropdownRef.current.contains(e.target as Node)) {
-        setLangDropdownOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   return (
+    // Two columns at every width: fixed 281px columns on desktop, equal halves with a 12px gap on phones.
+    // Text sizes use cqw (this section is the container) so phones get the desktop layout, scaled.
     <section
-      className="grid w-full max-w-[562px] grid-cols-[281px_281px] gap-0 max-[562px]:grid-cols-1"
+      className="@container grid w-full max-w-[562px] grid-cols-[281px_281px] gap-0 max-[562px]:grid-cols-2 max-[562px]:gap-x-3 [--left-card:calc(50%-6px)] [--right-card:calc(50%-6px)] min-[563px]:[--left-card:271px] min-[563px]:[--right-card:224px]"
       style={{ marginTop: 40 }}
     >
-      {/* Left column: 271px wide, aligned to navbar left */}
+      {/* Row 1, left: resume + Experience, aligned to navbar left */}
       <div className="flex w-[281px] max-[562px]:w-full flex-col">
         <motion.div
           className="relative mr-auto max-w-[271px] overflow-hidden max-[562px]:max-w-none"
@@ -147,12 +489,11 @@ export default function CardsSection() {
           </span>
           <a
             href="/shobhit_srivastava_2026_march.pdf"
-            download="Shobhit_Srivastava_Resume_March_2026.pdf"
-            className="flex w-full min-h-[44px] items-center justify-center gap-2 rounded-[10px] bg-[#FC6E20] font-semibold text-[#323232] touch-manipulation transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#323232] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFE7D0]"
+            download="Shobhit_Srivastava_Resume.pdf"
+            className="flex w-full min-h-[44px] items-center justify-center gap-2 rounded-[10px] bg-[#FC6E20] font-semibold text-[#323232] touch-manipulation transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#323232] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFE7D0] min-[563px]:min-w-[271px]"
             style={{
-              minWidth: 271,
               height: 47,
-              fontSize: 24,
+              fontSize: "clamp(15px, 4.27cqw, 24px)",
               letterSpacing: "-0.05em",
             }}
           >
@@ -160,417 +501,132 @@ export default function CardsSection() {
             <DownloadIcon />
           </a>
         </motion.div>
-        <div
+        <ExpandCard
           id="section-experience"
-          className="w-[271px] max-[562px]:w-full overflow-hidden rounded-[10px] bg-[#323232] p-4"
-          style={{
-            minHeight: 168,
-            marginTop: 35,
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => setExperienceOpen(!experienceOpen)}
-            className="grid w-full min-h-[44px] grid-cols-[1fr_auto] items-center gap-3 border-0 bg-transparent p-0 text-left cursor-pointer touch-manipulation rounded-[6px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFE7D0] focus-visible:ring-offset-2 focus-visible:ring-offset-[#323232]"
-          >
-            <span
-              className="min-w-0 overflow-hidden font-outfit font-normal leading-none text-[#FFE7D0]"
-              style={{
-                fontSize: 48,
-                letterSpacing: "-0.11em",
-              }}
-            >
-              {t("cards.experience")}
-            </span>
-            <ChevronDown rotate={experienceOpen} />
-          </button>
-
-          <AnimatePresence mode="wait">
-            {!experienceOpen ? (
-              <motion.div
-                key="tldr"
-                initial={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.25, ease: "easeInOut" }}
-                className="font-medium leading-tight text-[#FFE7D0]"
-                style={{
-                  marginTop: 6,
-                  fontSize: 14,
-                  letterSpacing: "-0.05em",
-                }}
-              >
-                <p>{t("cards.experienceGraduating")}</p>
-                <p>{t("cards.experienceWorkedAt")}</p>
-                <p>{t("cards.experienceDomain")}</p>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="timeline"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
-                style={{ marginTop: 32, overflow: "hidden" }}
-                className="relative"
-              >
-                <motion.div
-                  className="flex flex-col"
-                  initial={{ y: -12 }}
-                  animate={{ y: 0 }}
-                  transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
-                >
-                  {EXPERIENCES.map((entry, i) => (
-                    <div
-                      key={i}
-                      className="flex items-stretch"
-                      style={{ gap: 10 }}
-                    >
-                      {/* Timeline: dot + line 10px left of data */}
-                      <div
-                        className="flex shrink-0 flex-col items-center"
-                        style={{ width: 10 }}
-                      >
-                        <div
-                          className="rounded-full bg-[#FFE7D0]"
-                          style={{ width: 7, height: 7 }}
-                        />
-                        {i < EXPERIENCES.length - 1 && (
-                          <div
-                            className="w-px flex-1 min-h-[28px] bg-[#FFE7D0]"
-                            style={{ marginTop: 2 }}
-                          />
-                        )}
-                      </div>
-                      {/* Content: fixed 81.02px gap between company and role */}
-                      <div
-                        className="min-w-0 flex-1 font-outfit font-normal text-[#FFE7D0]"
-                        style={{
-                          letterSpacing: "-0.11em",
-                          paddingBottom: i < EXPERIENCES.length - 1 ? 22 : 0,
-                        }}
-                      >
-                        <Link
-                          href={`/experiences/${entry.slug}?from=experience`}
-                          className="flex items-center min-h-[1.5em] no-underline text-[#FFE7D0] hover:opacity-80"
-                          style={{ marginBottom: 14 }}
-                        >
-                          <span
-                            className="min-w-0 shrink"
-                            style={{ fontSize: 18 }}
-                          >
-                            {entry.company}
-                          </span>
-                          <span
-                            className="shrink-0 min-[563px]:w-[81.02px] max-[562px]:w-4"
-                            aria-hidden
-                          />
-                          <span
-                            className="flex shrink-0 items-center gap-1"
-                            style={{ fontSize: 14 }}
-                          >
-                            {entry.role}
-                            <ExternalLinkIcon />
-                          </span>
-                        </Link>
-                        <p
-                          className="text-justify leading-snug"
-                          style={{ fontSize: 10, letterSpacing: "normal" }}
-                        >
-                          {entry.description}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-        <div
-          id="section-projects"
-          className="w-[271px] max-[562px]:w-full overflow-hidden rounded-[10px] bg-[#FC6E20] p-4"
-          style={{
-            minHeight: 168,
-            marginTop: 20,
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => setProjectsOpen(!projectsOpen)}
-            className="grid w-full min-h-[44px] grid-cols-[1fr_auto] items-center gap-3 border-0 bg-transparent p-0 text-left cursor-pointer touch-manipulation rounded-[6px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#323232] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FC6E20]"
-          >
-            <span
-              className="min-w-0 overflow-hidden font-outfit font-normal leading-none text-[#323232]"
-              style={{
-                fontSize: 64,
-                letterSpacing: "-0.11em",
-              }}
-            >
-              {t("cards.projects")}
-            </span>
-            <ChevronDown className="text-[#323232]" rotate={projectsOpen} />
-          </button>
-
-          <AnimatePresence mode="wait">
-            {!projectsOpen ? (
-              <motion.div
-                key="tldr"
-                initial={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.25, ease: "easeInOut" }}
-                className="font-medium leading-tight text-[#323232]"
-                style={{
-                  marginTop: 6,
-                  fontSize: 14,
-                  letterSpacing: "-0.05em",
-                }}
-              >
-                <p>{t("cards.projectsRepos")}</p>
-                <p>{t("cards.projectsContributions")}</p>
-                <p>{t("cards.projectsOpenSource")}</p>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="project"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
-                style={{ marginTop: 24, overflow: "hidden" }}
-              >
-                <motion.div
-                  initial={{ y: -12 }}
-                  animate={{ y: 0 }}
-                  transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
-                >
-                  {PROJECTS.map((project, i) => (
-                    <div
-                      key={i}
-                      className="font-outfit font-normal text-[#323232]"
-                      style={i > 0 ? { marginTop: 28 } : undefined}
-                    >
-                      <Link
-                        href={`/projects/${project.slug}?from=projects`}
-                        className="flex items-start justify-between gap-2 no-underline text-[#323232] hover:opacity-80"
-                        aria-label={`Open ${project.name}`}
-                      >
-                        <div className="min-w-0 flex-1">
-                          <p style={{ fontSize: 16 }}>{project.name}</p>
-                          <p
-                            className="mt-1 leading-tight"
-                            style={{ fontSize: 12 }}
-                          >
-                            {project.tagline}
-                          </p>
-                        </div>
-                        <span className="mt-0.5 flex shrink-0 items-center gap-1">
-                          <ExternalLinkIcon className="text-[#323232]" />
-                        </span>
-                      </Link>
-                      <Link
-                        href={`/projects/${project.slug}?from=projects`}
-                        className="mt-3 block no-underline text-[#323232] hover:opacity-80"
-                        aria-label={`Open ${project.name} project details from image`}
-                      >
-                        <div className="relative w-full overflow-hidden rounded-md max-[562px]:aspect-221/140 min-[563px]:h-[140px] min-[563px]:w-[221px]">
-                          <Image
-                            src={project.image}
-                            alt={project.imageAlt}
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 562px) 100vw, 221px"
-                          />
-                        </div>
-                        <p
-                          className="mt-2 leading-snug"
-                          style={{ fontSize: 12, letterSpacing: "normal" }}
-                        >
-                          {project.description}
-                        </p>
-                      </Link>
-                    </div>
-                  ))}
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+          panelId="experience-panel"
+          open={experienceOpen}
+          onToggle={() => setExperienceOpen(!experienceOpen)}
+          title={t("cards.experience")}
+          titleSize="clamp(24px, 8.54cqw, 48px)"
+          tone="dark"
+          widthClass="w-[271px]"
+          marginTop={35}
+          tldr={
+            <>
+              <p>{t("cards.experienceGraduating")}</p>
+              <p>{t("cards.experienceWorkedAt")}</p>
+              <p>{t("cards.experienceDomain")}</p>
+            </>
+          }
+        />
       </div>
 
-      {/* Right column: 224px wide, aligned to navbar right; gap above on mobile when stacked */}
-      <div className="flex w-[281px] max-[562px]:w-full max-[562px]:mt-6 flex-col items-end">
+      {/* Row 1, right: status, aligned to navbar right */}
+      <div className="flex w-[281px] max-[562px]:w-full flex-col items-end">
         <div
-          ref={langDropdownRef}
-          className="relative flex w-[224px] max-[562px]:w-full items-start overflow-hidden border-2 border-[#323232] bg-[#FFE7D0] p-4 font-bold leading-tight text-[#323232]"
+          className="relative flex w-[224px] max-[562px]:w-full flex-1 flex-col justify-between overflow-hidden border-2 border-[#323232] bg-[#FFE7D0] p-4 max-[562px]:p-3 font-bold leading-tight text-[#323232]"
           style={{
-            height: 252,
+            minHeight: 250,
             letterSpacing: "-0.05em",
           }}
         >
-          <p
-            className="min-h-0 min-w-0 flex-1 overflow-hidden pr-14 text-[#323232] max-[562px]:text-[clamp(0.875rem,4vw,1.25rem)]"
-            style={{
-              fontSize: "clamp(0.875rem, 3.8vw, 1.75rem)",
-              lineHeight: 1.28,
-              letterSpacing: "-0.04em",
-            }}
-          >
-            {t("banner.text")}
-          </p>
-          {/* Translation badge: top-right, shows selected language */}
-          <div className="absolute right-2 top-2 flex flex-col items-end">
-            <button
-              type="button"
-              onClick={() => setLangDropdownOpen((o) => !o)}
-              className="flex min-h-[32px] items-center rounded-md border border-[#323232] bg-[#FFE7D0] px-2 py-1 font-outfit text-sm font-medium text-[#323232] shadow-sm transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#323232] focus-visible:ring-offset-1"
-              aria-expanded={langDropdownOpen}
-              aria-haspopup="listbox"
-              aria-label="Select language"
-            >
-              {localeLabel(locale)}
-            </button>
-            <AnimatePresence>
-              {langDropdownOpen && (
-                <motion.ul
-                  initial={{ opacity: 0, y: -4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  transition={{ duration: 0.15 }}
-                  role="listbox"
-                  className="absolute right-0 top-full z-50 mt-1 max-h-[240px] min-w-[120px] overflow-auto rounded-md border border-[#323232] bg-[#FFE7D0] py-1 shadow-lg"
-                  style={{ marginTop: 4 }}
-                >
-                  {locales.map((l) => (
-                    <li key={l} role="option" aria-selected={l === locale}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setLocale(l as Locale);
-                          setLangDropdownOpen(false);
-                        }}
-                        className={`w-full px-3 py-2 text-left font-outfit text-sm transition-colors hover:bg-[#FC6E20]/20 ${
-                          l === locale ? "bg-[#FC6E20]/30 font-medium" : ""
-                        }`}
-                      >
-                        {localeLabel(l as Locale)}
-                      </button>
-                    </li>
-                  ))}
-                </motion.ul>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-        <div
-          id="section-contact"
-          className="w-[224px] max-[562px]:w-full overflow-hidden rounded-[10px] bg-[#323232] p-4"
-          style={{
-            minHeight: 168,
-            marginTop: 20,
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => setContactOpen(!contactOpen)}
-            className="grid w-full min-h-[44px] grid-cols-[1fr_auto] items-center gap-3 border-0 bg-transparent p-0 text-left cursor-pointer touch-manipulation rounded-[6px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFE7D0] focus-visible:ring-offset-2 focus-visible:ring-offset-[#323232]"
-          >
-            <span
-              className="min-w-0 overflow-hidden font-outfit font-normal leading-none text-[#FFE7D0]"
+          <div className="min-h-0 min-w-0" style={{ marginTop: 36 }}>
+            <p
+              className="text-[#323232]"
               style={{
-                fontSize: 48,
-                letterSpacing: "-0.11em",
+                fontSize: "clamp(16px, 4.27cqw, 24px)",
+                lineHeight: 1.2,
+                letterSpacing: "-0.04em",
               }}
             >
-              {t("cards.contact")}
+              {t("status.text")}
+            </p>
+            <p
+              className="font-outfit font-medium text-[#323232]/80"
+              style={{ marginTop: 8, fontSize: "clamp(12px, 2.5cqw, 14px)", letterSpacing: "-0.04em" }}
+            >
+              {t("status.where")}
+            </p>
+          </div>
+          {/* Status badge: top-right, same slot the language picker used */}
+          <span className="absolute right-2 top-2 flex min-h-[32px] items-center gap-1.5 rounded-md border border-[#323232] bg-[#FFE7D0] px-2 py-1 font-outfit text-sm font-medium text-[#323232] shadow-sm">
+            <span className="relative flex size-2" aria-hidden>
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#FC6E20] opacity-75" />
+              <span className="relative inline-flex size-2 rounded-full bg-[#FC6E20]" />
             </span>
-            <ChevronDown className="text-[#FFE7D0]" rotate={contactOpen} />
-          </button>
-
-          <AnimatePresence mode="wait">
-            {!contactOpen ? (
-              <motion.div
-                key="tldr"
-                initial={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.25, ease: "easeInOut" }}
-                className="font-medium leading-tight text-[#FFE7D0]"
-                style={{
-                  marginTop: 6,
-                  fontSize: 14,
-                  letterSpacing: "-0.05em",
-                }}
-              >
-                <p>{t("cards.contactTldr")}</p>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="details"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
-                style={{ marginTop: 32, overflow: "hidden" }}
-                className="relative"
-              >
-                <motion.div
-                  className="flex flex-col font-outfit font-normal text-[#FFE7D0]"
-                  initial={{ y: -12 }}
-                  animate={{ y: 0 }}
-                  transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
-                  style={{ letterSpacing: "-0.05em" }}
-                >
-                  <a
-                    href="mailto:shobhitsrivastava729@gmail.com"
-                    className="flex items-center justify-between gap-2 no-underline text-[#FFE7D0] hover:opacity-80"
-                    style={{ fontSize: 14 }}
-                  >
-                    <span>{t("cards.gmail")}</span>
-                    <span style={{ fontSize: 10, letterSpacing: "normal" }}>
-                      shobhitsrivastava729@gmail.com
-                    </span>
-                  </a>
-                  <a
-                    href="https://github.com/shobhitsrivastava2023"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-1 no-underline text-[#FFE7D0] hover:opacity-80"
-                    style={{ fontSize: 14, marginTop: 14 }}
-                  >
-                    <span>{t("cards.github")}</span>
-                    <span className="flex items-center gap-1">
-                      @shobhitsrivastava2023
-                      <ExternalLinkIcon />
-                    </span>
-                  </a>
-                  <a
-                    href="https://x.com/Shobhit_Talks"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-1 no-underline text-[#FFE7D0] hover:opacity-80"
-                    style={{ fontSize: 14, marginTop: 14 }}
-                  >
-                    <span>{t("cards.twitter")}</span>
-                    <span className="flex items-center gap-1">
-                      x.com/Shobhit_Talks
-                      <ExternalLinkIcon />
-                    </span>
-                  </a>
-                  <a
-                    href="https://www.linkedin.com/in/shobhit-srivastava-s1323/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-1 no-underline text-[#FFE7D0] hover:opacity-80"
-                    style={{ fontSize: 14, marginTop: 14 }}
-                  >
-                    <span>{t("cards.linkedin")}</span>
-                    <ExternalLinkIcon />
-                  </a>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+            {t("status.badge")}
+          </span>
+          <a
+            href="mailto:shobhitsrivastava729@gmail.com"
+            className="inline-flex min-h-[44px] w-fit items-center gap-1 font-outfit font-medium text-[#323232] underline decoration-[#FC6E20] decoration-2 underline-offset-4 hover:opacity-80"
+            style={{ fontSize: "clamp(15px, 3.2cqw, 18px)" }}
+          >
+            {t("status.cta")}
+            <ExternalLinkIcon />
+          </a>
         </div>
+        <JoinGap active={experienceOpen} />
       </div>
+
+      <ExpandPanel id="experience-panel" open={experienceOpen} side="left" tone="dark">
+        <ExperienceTimeline />
+      </ExpandPanel>
+
+      {/* Row 2, left: Projects */}
+      <div className="flex w-[281px] max-[562px]:w-full flex-col">
+        <ExpandCard
+          id="section-projects"
+          panelId="projects-panel"
+          open={projectsOpen}
+          onToggle={toggleProjects}
+          title={t("cards.projects")}
+          titleSize="clamp(32px, 11.39cqw, 64px)"
+          tone="orange"
+          widthClass="w-[271px]"
+          marginTop={20}
+          tldr={
+            <>
+              <p>{t("cards.projectsRepos").replace("{count}", String(repoCount))}</p>
+              <p>{t("cards.projectsLeetcode")}</p>
+              <p>{t("cards.projectsOpenSource")}</p>
+            </>
+          }
+        />
+        <JoinGap active={contactOpen} />
+      </div>
+
+      {/* Row 2, right: Contact */}
+      <div className="flex w-[281px] max-[562px]:w-full flex-col items-end">
+        <ExpandCard
+          id="section-contact"
+          panelId="contact-panel"
+          open={contactOpen}
+          onToggle={toggleContact}
+          title={t("cards.contact")}
+          titleSize="clamp(24px, 8.54cqw, 48px)"
+          tone="dark"
+          widthClass="w-[224px]"
+          marginTop={20}
+          tldr={
+            <ul className="m-0 grid w-fit list-none grid-cols-2 gap-x-5 max-[562px]:gap-x-3 gap-y-1.5 p-0" aria-label={t("cards.contactTldr")}>
+              {CONTACTS.map(({ key, label, Icon }) => (
+                <li key={key} className="flex items-center gap-1.5">
+                  <Icon size={13} />
+                  {label}
+                </li>
+              ))}
+            </ul>
+          }
+        />
+        <JoinGap active={projectsOpen} />
+      </div>
+
+      <ExpandPanel id="projects-panel" open={projectsOpen} side="left" tone="orange">
+        <ProjectTiles />
+      </ExpandPanel>
+      <ExpandPanel id="contact-panel" open={contactOpen} side="right" tone="dark">
+        <ContactLinks />
+      </ExpandPanel>
     </section>
   );
 }

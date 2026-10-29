@@ -1,9 +1,8 @@
 "use client";
 
-import { useLanguage } from "../context/LanguageContext";
+import { t } from "../data/strings";
 
 export default function Philosophy() {
-  const { t } = useLanguage();
   return (
     <section
       id="philosophy"

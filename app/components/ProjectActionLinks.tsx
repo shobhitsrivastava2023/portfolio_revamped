@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useLanguage } from "../context/LanguageContext";
+import { t } from "../data/strings";
 
 const linkClass =
   "flex flex-1 min-h-[44px] items-center justify-center rounded-[10px] font-outfit font-medium no-underline hover:opacity-90 touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
@@ -20,23 +20,29 @@ export default function ProjectActionLinks({
   liveUrl: string;
   demoUrl?: string;
 }) {
-  const { t } = useLanguage();
+  const hasGithub = githubUrl !== "#";
   const hasLive = liveUrl !== "#";
+
+  if (!hasGithub && !hasLive && !demoUrl) {
+    return <div style={{ marginBottom: 60 }} />;
+  }
 
   return (
     <div
       className="mt-10 flex w-full flex-wrap gap-4"
       style={{ marginBottom: 60 }}
     >
-      <Link
-        href={githubUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={`${linkClass} bg-[#323232] text-[#FFE7D0] focus-visible:ring-[#FFE7D0] focus-visible:ring-offset-[#FFE7D0]`}
-        style={linkStyle}
-      >
-        {t("project.github")}
-      </Link>
+      {hasGithub && (
+        <Link
+          href={githubUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${linkClass} bg-[#323232] text-[#FFE7D0] focus-visible:ring-[#FFE7D0] focus-visible:ring-offset-[#FFE7D0]`}
+          style={linkStyle}
+        >
+          {t("project.github")}
+        </Link>
+      )}
       {hasLive && (
         <Link
           href={liveUrl}

@@ -3,14 +3,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useLanguage } from "../context/LanguageContext";
+import { t } from "../data/strings";
 
 const NAV_WIDTH = 562;
 const NAV_HEIGHT = 76;
+/** Space between the orange bar and the dropdown menu. */
+const MENU_GAP = 10;
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const { t } = useLanguage();
 
   return (
     <div
@@ -77,7 +78,7 @@ export default function Navbar() {
         className="w-full overflow-hidden transition-all duration-300 ease-out"
         style={{
           position: "absolute",
-          top: 29 + NAV_HEIGHT,
+          top: 29 + NAV_HEIGHT + MENU_GAP,
           left: 0,
           right: 0,
           zIndex: 50,

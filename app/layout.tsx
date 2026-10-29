@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Outfit, Urbanist } from "next/font/google";
 import "./globals.css";
-import { LanguageProvider } from "./context/LanguageContext";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "./lib/site";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -15,8 +15,24 @@ const urbanist = Urbanist({
 });
 
 export const metadata: Metadata = {
-  title: "Shobhit | Portfolio",
-  description: "Portfolio of Shobhit",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME} · Fullstack Developer`,
+    template: `%s · ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  authors: [{ name: SITE_NAME, url: SITE_URL }],
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} · Fullstack Developer`,
+    description: SITE_DESCRIPTION,
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    creator: "@Shobhit_Talks",
+  },
   icons: {
     icon: "/icon.svg",
   },
@@ -39,7 +55,7 @@ export default function RootLayout({
         className={`${outfit.variable} ${urbanist.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
-        <LanguageProvider>{children}</LanguageProvider>
+        {children}
       </body>
     </html>
   );

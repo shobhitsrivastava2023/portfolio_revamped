@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# shobhit-portfolio
 
-## Getting Started
+My personal site. Next.js 16 (App Router), React 19, Tailwind 4, Framer Motion. One narrow 562px column, three colours (`#FFE7D0` cream, `#FC6E20` orange, `#323232` charcoal), Outfit + Urbanist.
 
-First, run the development server:
+The site has two live parts besides the static content.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Proof of Work
+
+A live feed of what I'm actually doing on GitHub, so you don't have to take my resume's word for it.
+
+```
+GitHub webhook ──► /api/pow/github/webhook ──► Neon Postgres (pow_events, last 4 days)
+                          │                            │
+                          └──► Google Calendar         └──► /api/pow/feed ──► homepage (polls every 30s)
+                               (permanent history)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- The webhook verifies `x-hub-signature-256` with HMAC-SHA256 and maps pushes, PRs, CI runs and releases to `PowEvent`s ([app/lib/pow/github.ts](app/lib/pow/github.ts)).
+- Events are upserted on a `dedupe_key`, so GitHub redeliveries don't create duplicates ([app/lib/pow/db.ts](app/lib/pow/db.ts)).
+- Postgres is hot storage only. A cron hits `/api/pow/retention` to drop anything older than 4 days; the long-term record lives in a public Google Calendar ([app/lib/pow/googleCalendar.ts](app/lib/pow/googleCalendar.ts)).
+- Schema: [neon/pow_events.sql](neon/pow_events.sql).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Now playing
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`/api/spotify/now-playing` uses a stored refresh token to show whatever I'm listening to. `/api/spotify/auth` and `/api/spotify/callback` exist only to get that token once.
 
-## Learn More
+## Content
 
-To learn more about Next.js, take a look at the following resources:
+Everything editable lives in `app/data/`:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| File | What |
+| --- | --- |
+| `strings.ts` | All UI copy |
+| `projects.ts` | Project cards + detail pages |
+| `experience.ts` | Experience timeline + detail pages |
+| `blogs.ts` | Blog posts (HTML strings) |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Running it
 
-## Deploy on Vercel
+```bash
+npm install
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The static site runs without any env vars. The live sections need:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Variable | For |
+| --- | --- |
+| `DATABASE_URL` | Neon Postgres connection string |
+| `GITHUB_WEBHOOK_SECRET` | Webhook signature check |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`, `GOOGLE_CALENDAR_ID` | Writing events to Calendar (get the refresh token via `/api/google/auth`) |
+| `POW_CALENDAR_PUBLIC_URL` | Where "open calendar" points |
+| `POW_RETENTION_TOKEN` | Auth for the retention cron |
+| `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REFRESH_TOKEN` | Now playing |
+| `NEXT_PUBLIC_SITE_URL` | Optional override for the canonical URL (defaults to https://shobhitsrivastava.com) |

@@ -1,10 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useLanguage } from "../context/LanguageContext";
+import { t } from "../data/strings";
+
+/** Spotify artist page. Leave empty to hide the link. */
+const MUSIC_URL = "https://open.spotify.com/artist/7zy2N6RF08pABki08HEw1B";
 
 export default function MusicProduction() {
-  const { t } = useLanguage();
   return (
     <section
       className="w-full max-w-[562px] rounded-[10px] pt-8 pb-8 pl-8 pr-[70px] max-[562px]:pr-8"
@@ -47,16 +49,21 @@ export default function MusicProduction() {
             height={200}
             className="object-cover size-[200px] max-[562px]:w-full! max-[562px]:h-auto! max-[562px]:aspect-square!"
           />
-          <span
-            className="mt-1 font-outfit font-medium"
-            style={{
-              fontSize: 8,
-              letterSpacing: "-0.05em",
-              color: "var(--background)",
-            }}
-          >
-            {t("music.spotify")}
-          </span>
+          {MUSIC_URL && (
+            <a
+              href={MUSIC_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 w-fit font-outfit font-medium underline decoration-[#FC6E20] decoration-2 underline-offset-4 hover:opacity-80"
+              style={{
+                fontSize: 14,
+                letterSpacing: "-0.05em",
+                color: "var(--background)",
+              }}
+            >
+              {t("music.spotify")} ↗
+            </a>
+          )}
         </div>
       </div>
     </section>

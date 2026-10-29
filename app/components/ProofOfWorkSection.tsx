@@ -2,7 +2,56 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useLanguage } from "../context/LanguageContext";
+import { t } from "../data/strings";
+import type { ContributionDay } from "../lib/github";
+
+/** Cell fill per GitHub level (0-4): faint cream for empty, then orange of rising strength. */
+const LEVEL_FILL = [
+  "color-mix(in oklab, var(--background) 12%, transparent)",
+  "color-mix(in oklab, #FC6E20 40%, transparent)",
+  "color-mix(in oklab, #FC6E20 65%, transparent)",
+  "color-mix(in oklab, #FC6E20 85%, transparent)",
+  "#FC6E20",
+];
+
+function ContributionStrip({ days }: { days: ContributionDay[] }) {
+  const total = days.reduce((n, d) => n + d.count, 0);
+  const weeks = Math.ceil(days.length / 7);
+
+  return (
+    <div style={{ marginTop: 16 }}>
+      {/* Columns share the card width, so cells scale from phone to desktop */}
+      <div
+        className="grid w-full"
+        style={{
+          gridTemplateRows: "repeat(7, auto)",
+          gridTemplateColumns: `repeat(${weeks}, minmax(0, 1fr))`,
+          gridAutoFlow: "column",
+          gap: 3,
+        }}
+        role="img"
+        aria-label={`${total} GitHub contributions in the last ${weeks} weeks`}
+      >
+        {days.map((d) => (
+          <div
+            key={d.date}
+            title={`${d.count} on ${d.date}`}
+            className="aspect-square rounded-[2px]"
+            style={{ backgroundColor: LEVEL_FILL[d.level] ?? LEVEL_FILL[0] }}
+          />
+        ))}
+      </div>
+      <p
+        className="font-outfit font-medium opacity-90"
+        style={{ marginTop: 8, fontSize: 12, letterSpacing: "-0.04em" }}
+      >
+        {t("pow.activity")
+          .replace("{count}", String(total))
+          .replace("{weeks}", String(weeks))}
+      </p>
+    </div>
+  );
+}
 
 type PowFeed = {
   days: Array<{
@@ -38,8 +87,11 @@ function typeLabel(type: string) {
   }
 }
 
-export default function ProofOfWorkSection() {
-  const { t } = useLanguage();
+export default function ProofOfWorkSection({
+  contributions,
+}: {
+  contributions: ContributionDay[];
+}) {
   const [feed, setFeed] = useState<PowFeed | null>(null);
 
   useEffect(() => {
@@ -72,7 +124,7 @@ export default function ProofOfWorkSection() {
           <div className="min-w-0">
             <p
               className="font-outfit font-medium"
-              style={{ fontSize: 34, letterSpacing: "-0.08em" }}
+              style={{ fontSize: "clamp(26px, 7.5vw, 34px)", letterSpacing: "-0.08em" }}
             >
               {t("pow.title")}
             </p>
@@ -102,9 +154,11 @@ export default function ProofOfWorkSection() {
           </Link>
         </div>
 
+        {contributions.length > 0 && <ContributionStrip days={contributions} />}
+
         <div
           className="mt-4 grid gap-3"
-          style={{ gridTemplateColumns: "1fr", marginTop: 16 }}
+          style={{ gridTemplateColumns: "minmax(0, 1fr)", marginTop: 16 }}
         >
           {!feed || feed.days.length === 0 ? (
             <div
@@ -149,17 +203,17 @@ export default function ProofOfWorkSection() {
                             href={e.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="block no-underline transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-background focus-visible:ring-offset-2 focus-visible:ring-offset-[#323232]"
+                            className="flex min-w-0 no-underline transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-background focus-visible:ring-offset-2 focus-visible:ring-offset-[#323232]"
                             style={{ color: "var(--background)" }}
                           >
                             <span
-                              className="font-outfit font-medium"
+                              className="shrink-0 font-outfit font-medium"
                               style={{ fontSize: 14, letterSpacing: "-0.04em" }}
                             >
                               {typeLabel(e.type)}
                             </span>
                             <span
-                              className="font-outfit font-medium opacity-90"
+                              className="min-w-0 truncate font-outfit font-medium opacity-90"
                               style={{
                                 marginLeft: 10,
                                 fontSize: 14,

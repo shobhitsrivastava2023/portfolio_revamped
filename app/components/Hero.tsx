@@ -1,10 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useLanguage } from "../context/LanguageContext";
+import { t } from "../data/strings";
 
 export default function Hero() {
-  const { t } = useLanguage();
   return (
     <section
       className="grid w-full max-w-[562px] grid-cols-[281px_281px] gap-0 max-[562px]:grid-cols-1"

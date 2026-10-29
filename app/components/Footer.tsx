@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useLanguage } from "../context/LanguageContext";
+import { t } from "../data/strings";
 
 export default function Footer() {
   const year = new Date().getFullYear();
-  const { t } = useLanguage();
 
   return (
     <footer
