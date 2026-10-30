@@ -1,3 +1,5 @@
+import type { StoryStyle } from "./story";
+
 export type DrawerKind = "thought" | "article" | "photo" | "video" | "audio";
 export type DrawerVisibility = "public" | "unlisted" | "draft";
 
@@ -26,6 +28,8 @@ export type DrawerItem = {
   pinned: boolean;
   visibility: DrawerVisibility;
   source: "admin" | "telegram";
+  /** custom share card design; null uses the default */
+  storyStyle: StoryStyle | null;
 };
 
 export const DRAWER_KINDS: DrawerKind[] = ["thought", "article", "photo", "video", "audio"];

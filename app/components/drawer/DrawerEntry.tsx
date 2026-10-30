@@ -9,6 +9,7 @@ import ShareButton from "./ShareButton";
 import ArticleView from "./ArticleView";
 import StoryButton from "./StoryButton";
 import { articleTitle } from "../../lib/drawer/article";
+import { storyVersion } from "../../lib/drawer/story";
 
 function Photos({ item }: { item: DrawerItem }) {
   const photos = item.media;
@@ -96,7 +97,7 @@ export default function DrawerEntry({ item, linkDate = true }: { item: DrawerIte
           <span key={tag}>#{tag}</span>
         ))}
         <span className="ml-auto flex items-center gap-3">
-          <StoryButton id={item.id} />
+          <StoryButton id={item.id} version={storyVersion(item.storyStyle)} />
           <ShareButton path={`/drawer/${item.id}`} title={shareTitle} />
         </span>
       </footer>

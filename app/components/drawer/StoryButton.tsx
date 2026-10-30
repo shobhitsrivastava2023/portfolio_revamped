@@ -2,32 +2,21 @@
 
 import { useState } from "react";
 import { t } from "../../data/strings";
+import { shareImage } from "../../lib/drawer/shareImage";
 
 /**
- * Shares the item's story card (/drawer/<id>/story, 1080×1920) as an image.
+ * Shares the item's story card (/drawer/<id>/story, in its saved design) as an image.
  * On phones this opens the share sheet with the PNG attached, so it can go
  * straight to an Instagram story; elsewhere it downloads the PNG.
+ * `version` changes when the design does, so a cached old card isn't served.
  */
-export default function StoryButton({ id }: { id: string }) {
+export default function StoryButton({ id, version }: { id: string; version: string }) {
   const [busy, setBusy] = useState(false);
 
   const share = async () => {
     setBusy(true);
     try {
-      const res = await fetch(`/drawer/${id}/story`);
-      if (!res.ok) throw new Error(`story ${res.status}`);
-      const file = new File([await res.blob()], `drawer-${id}.png`, { type: "image/png" });
-
-      if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file] }).catch(() => {});
-        return;
-      }
-      const url = URL.createObjectURL(file);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = file.name;
-      a.click();
-      URL.revokeObjectURL(url);
+      await shareImage(`/drawer/${id}/story?v=${version}`, `drawer-${id}.png`);
     } catch (err) {
       console.error("drawer: story card failed", err);
     } finally {

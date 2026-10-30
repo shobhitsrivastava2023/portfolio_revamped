@@ -23,3 +23,6 @@ create index if not exists drawer_items_feed_idx
 create unique index if not exists drawer_items_group_key_uniq
   on public.drawer_items (group_key)
   where group_key is not null;
+
+-- Share card design per item (see app/lib/drawer/story.ts); null = the default card.
+alter table public.drawer_items add column if not exists story_style jsonb;

@@ -1,6 +1,7 @@
 import { randomBytes } from "crypto";
 import { neon } from "@neondatabase/serverless";
 import type { DrawerItem, DrawerKind, DrawerMedia, DrawerVisibility } from "./types";
+import { sanitizeStoryStyle } from "./story";
 
 function requiredEnv(name: string): string {
   const v = process.env[name];
@@ -23,6 +24,7 @@ type DrawerRow = {
   pinned: boolean;
   visibility: DrawerVisibility;
   source: "admin" | "telegram";
+  story_style: unknown;
 };
 
 function toItem(r: DrawerRow): DrawerItem {
@@ -37,6 +39,7 @@ function toItem(r: DrawerRow): DrawerItem {
     pinned: r.pinned,
     visibility: r.visibility,
     source: r.source,
+    storyStyle: r.story_style ? sanitizeStoryStyle(r.story_style) : null,
   };
 }
 
@@ -48,7 +51,7 @@ function newId(): string {
 /** Public feed: pinned first, then newest. */
 export async function listPublicDrawerItems(limit = 50): Promise<DrawerItem[]> {
   const rows = (await sql()`
-    select id, created_at::text, kind, body, media, waveform, tags, pinned, visibility, source
+    select id, created_at::text, kind, body, media, waveform, tags, pinned, visibility, source, story_style
     from drawer_items
     where visibility = 'public'
     order by pinned desc, created_at desc
@@ -60,7 +63,7 @@ export async function listPublicDrawerItems(limit = 50): Promise<DrawerItem[]> {
 /** Everything, drafts included, for the admin page. */
 export async function listAllDrawerItems(): Promise<DrawerItem[]> {
   const rows = (await sql()`
-    select id, created_at::text, kind, body, media, waveform, tags, pinned, visibility, source
+    select id, created_at::text, kind, body, media, waveform, tags, pinned, visibility, source, story_style
     from drawer_items
     order by created_at desc
     limit 500;
@@ -71,7 +74,7 @@ export async function listAllDrawerItems(): Promise<DrawerItem[]> {
 /** One item for its share page. Drafts are only returned when `includeDrafts` is set. */
 export async function getDrawerItem(id: string, includeDrafts = false): Promise<DrawerItem | null> {
   const rows = (await sql()`
-    select id, created_at::text, kind, body, media, waveform, tags, pinned, visibility, source
+    select id, created_at::text, kind, body, media, waveform, tags, pinned, visibility, source, story_style
     from drawer_items
     where id = ${id} and (${includeDrafts} or visibility <> 'draft')
     limit 1;
@@ -104,7 +107,7 @@ export async function createDrawerItem(item: NewDrawerItem): Promise<DrawerItem>
       ${item.source},
       ${item.groupKey ?? null}
     )
-    returning id, created_at::text, kind, body, media, waveform, tags, pinned, visibility, source;
+    returning id, created_at::text, kind, body, media, waveform, tags, pinned, visibility, source, story_style;
   `) as DrawerRow[];
   return toItem(rows[0]);
 }
@@ -134,13 +137,13 @@ export async function upsertDrawerGroupItem(
       media = d.media || excluded.media,
       body = coalesce(d.body, excluded.body),
       tags = array(select distinct unnest(d.tags || excluded.tags))
-    returning id, created_at::text, kind, body, media, waveform, tags, pinned, visibility, source,
+    returning id, created_at::text, kind, body, media, waveform, tags, pinned, visibility, source, story_style,
       (xmax = 0) as created;
   `) as (DrawerRow & { created: boolean })[];
   return { item: toItem(rows[0]), created: rows[0].created };
 }
 
-export type DrawerPatch = Partial<Pick<DrawerItem, "body" | "tags" | "pinned" | "visibility" | "waveform">>;
+export type DrawerPatch = Partial<Pick<DrawerItem, "body" | "tags" | "pinned" | "visibility" | "waveform" | "storyStyle">>;
 
 export async function updateDrawerItem(id: string, patch: DrawerPatch): Promise<DrawerItem | null> {
   const rows = (await sql()`
@@ -149,9 +152,10 @@ export async function updateDrawerItem(id: string, patch: DrawerPatch): Promise<
       tags = case when ${"tags" in patch} then ${patch.tags ?? []}::text[] else tags end,
       pinned = case when ${"pinned" in patch} then ${patch.pinned ?? false} else pinned end,
       visibility = case when ${"visibility" in patch} then ${patch.visibility ?? "public"} else visibility end,
-      waveform = case when ${"waveform" in patch} then ${patch.waveform ? JSON.stringify(patch.waveform) : null}::jsonb else waveform end
+      waveform = case when ${"waveform" in patch} then ${patch.waveform ? JSON.stringify(patch.waveform) : null}::jsonb else waveform end,
+      story_style = case when ${"storyStyle" in patch} then ${patch.storyStyle ? JSON.stringify(patch.storyStyle) : null}::jsonb else story_style end
     where id = ${id}
-    returning id, created_at::text, kind, body, media, waveform, tags, pinned, visibility, source;
+    returning id, created_at::text, kind, body, media, waveform, tags, pinned, visibility, source, story_style;
   `) as DrawerRow[];
   return rows[0] ? toItem(rows[0]) : null;
 }
@@ -160,7 +164,7 @@ export async function updateDrawerItem(id: string, patch: DrawerPatch): Promise<
 export async function deleteDrawerItem(id: string): Promise<DrawerItem | null> {
   const rows = (await sql()`
     delete from drawer_items where id = ${id}
-    returning id, created_at::text, kind, body, media, waveform, tags, pinned, visibility, source;
+    returning id, created_at::text, kind, body, media, waveform, tags, pinned, visibility, source, story_style;
   `) as DrawerRow[];
   return rows[0] ? toItem(rows[0]) : null;
 }

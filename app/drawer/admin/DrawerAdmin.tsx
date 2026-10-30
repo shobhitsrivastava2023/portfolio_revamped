@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { DrawerItem, DrawerKind, DrawerMedia, DrawerVisibility } from "../../lib/drawer/types";
 import { computeWaveform, formatDrawerDate } from "../../lib/drawer/format";
+import StoryEditor from "./StoryEditor";
 
 const MAX_PHOTOS = 4;
 
@@ -231,6 +232,8 @@ export default function DrawerAdmin({ initialItems }: { initialItems: DrawerItem
   const router = useRouter();
   const [items, setItems] = useState(initialItems);
   const [note, setNote] = useState<string | null>(null);
+  /** The item whose share card is being designed. */
+  const [designing, setDesigning] = useState<string | null>(null);
 
   const replace = (item: DrawerItem) => setItems((all) => all.map((i) => (i.id === item.id ? item : i)));
 
@@ -325,10 +328,20 @@ export default function DrawerAdmin({ initialItems }: { initialItems: DrawerItem
               >
                 {item.pinned ? "pinned" : "pin"}
               </button>
+              <button
+                type="button"
+                aria-expanded={designing === item.id}
+                onClick={() => setDesigning((id) => (id === item.id ? null : item.id))}
+                className={`min-h-[32px] rounded-md border-0 px-2 font-outfit cursor-pointer ${designing === item.id ? "bg-[#323232] text-[#FFE7D0]" : "bg-[#323232]/10 text-[#323232]"}`}
+                style={{ fontSize: 13 }}
+              >
+                share card{item.storyStyle ? " ✦" : ""}
+              </button>
               <button type="button" onClick={() => remove(item)} className="min-h-[32px] rounded-md border-0 bg-transparent px-2 font-outfit text-[#C2410C] cursor-pointer hover:underline" style={{ fontSize: 13 }}>
                 delete
               </button>
             </div>
+            {designing === item.id && <StoryEditor item={item} onSaved={replace} />}
           </li>
         ))}
       </ul>

@@ -4,10 +4,11 @@ import { deleteDrawerItem, updateDrawerItem, type DrawerPatch } from "../../../.
 import { deleteObject } from "../../../../lib/drawer/r2";
 import { revalidateDrawer } from "../../../../lib/drawer/revalidate";
 import { DRAWER_VISIBILITIES } from "../../../../lib/drawer/types";
+import { sanitizeStoryStyle } from "../../../../lib/drawer/story";
 
 type Params = { params: Promise<{ id: string }> };
 
-/** Admin: edit text, tags, pin, visibility, or save a computed waveform. */
+/** Admin: edit text, tags, pin, visibility, share card design, or save a computed waveform. */
 export async function PATCH(request: NextRequest, { params }: Params) {
   if (!(await isAdmin())) return NextResponse.json({ error: "Not logged in" }, { status: 401 });
   const { id } = await params;
@@ -18,6 +19,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   if (Array.isArray(input.tags)) patch.tags = input.tags.map((t) => t.toLowerCase().trim()).filter(Boolean);
   if (typeof input.pinned === "boolean") patch.pinned = input.pinned;
   if (input.visibility && DRAWER_VISIBILITIES.includes(input.visibility)) patch.visibility = input.visibility;
+  if ("storyStyle" in input) patch.storyStyle = input.storyStyle ? sanitizeStoryStyle(input.storyStyle) : null;
   if (Array.isArray(input.waveform)) patch.waveform = input.waveform.slice(0, 400).map((n) => Math.max(0, Math.min(1, Number(n) || 0)));
 
   const item = await updateDrawerItem(id, patch);
